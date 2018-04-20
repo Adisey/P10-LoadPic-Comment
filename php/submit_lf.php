@@ -1,34 +1,43 @@
 <?php
-// Автор: Тимур Камаев, http://wp-kama.ru/
 
-if( isset( $_POST['my_file_upload'] ) ){  
-    // ВАЖНО! тут должны быть все проверки безопасности передавемых файлов и вывести ошибки если нужно
+if (isset($_POST['my_file_upload'])) {
 
     $uploaddir = '../uploads'; // . - текущая папка где находится submit.php
-    
-    // cоздадим папку если её нет
-    if( ! is_dir( $uploaddir ) ) mkdir( $uploaddir, 0777 );
 
-    $files      = $_FILES; // полученные файлы
+    // cоздадим папку если её нет
+    if (!is_dir($uploaddir)) mkdir($uploaddir, 0777);
+
+    $files = $_FILES; // полученные файлы
     $done_files = array();
 
     // переместим файлы из временной директории в указанную
-    foreach( $files as $file ){
-        $file_name = cyrillic_translit( $file['name'] );
-
-        if( move_uploaded_file( $file['tmp_name'], "$uploaddir/$file_name" ) ){
-            $done_files[] = realpath( "$uploaddir/$file_name" );
+    foreach ($files as $file) {
+        $file_name = cyrillic_translit($file['name']);
+//        Попытка проверки на дублирование файла и нимерация дубля.
+//        $fileconut = 0;
+//        $fileNew = $uploaddir / $file_name;
+//        while (is_file($uploaddir / $file_name)):
+//            $fileconut++;
+//            $fileNew = $uploaddir / $file_name . "(" . $fileconut . ")";
+//        endwhile;
+//
+//
+//        if (move_uploaded_file($file['tmp_name'], "$fileNew")) {
+//            $done_files[] = realpath("$fileNew");
+        if (move_uploaded_file($file['tmp_name'], "$uploaddir/$file_name")) {
+            $done_files[] = realpath("$uploaddir/$file_name");
         }
     }
-    
-    $data = $done_files ? array('files' => $done_files ) : array('error' => 'Ошибка загрузки файлов.');
-    
-    die( json_encode( $data ) );
+
+    $data = $done_files ? array('files' => $done_files) : array('error' => 'Ошибка загрузки файлов.');
+
+    die(json_encode($data));
 }
 
 
 ## Транслитирация кирилических символов
-function cyrillic_translit( $title ){
+function cyrillic_translit($title)
+{
     $iso9_table = array(
         'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Ѓ' => 'G',
         'Ґ' => 'G', 'Д' => 'D', 'Е' => 'E', 'Ё' => 'YO', 'Є' => 'YE',
@@ -50,10 +59,10 @@ function cyrillic_translit( $title ){
         'ы' => 'y', 'ь' => '', 'э' => 'e', 'ю' => 'yu', 'я' => 'ya'
     );
 
-    $name = strtr( $title, $iso9_table );
-    $name = preg_replace('~[^A-Za-z0-9\'_\-\.]~', '-', $name );
-    $name = preg_replace('~\-+~', '-', $name ); // --- на -
-    $name = preg_replace('~^-+|-+$~', '', $name ); // кил - на концах
+    $name = strtr($title, $iso9_table);
+    $name = preg_replace('~[^A-Za-z0-9\'_\-\.]~', '-', $name);
+    $name = preg_replace('~\-+~', '-', $name); // --- на -
+    $name = preg_replace('~^-+|-+$~', '', $name); // кил - на концах
 
     return $name;
 }

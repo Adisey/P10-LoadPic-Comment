@@ -1,7 +1,22 @@
 var files; // переменная. будет содержать данные файлов
 
 $(document).ready(function () {
+    hideButton();
 
+    function hideButton(stat){
+        if (stat === undefined) stat = "Выберите файл для загрузки.";
+
+        $('#previewImg').attr('src', 'img/Load.png');
+        $('#previewImg').attr("alt",'Выберите файл для загрузки.');
+        $('.ajax-reply').html(stat);
+        $('#uploadFileButton').css({"opacity": "0"});
+        $('#uploadFileButton').css({"cursor":"default"});
+    };
+    function showButton(){
+        $('#uploadFileButton').css({"opacity": "1"});
+        $('#uploadFileButton').css({"cursor": "pointer"});
+
+    };
     // заполняем переменную данными, при изменении значения поля file
     $('input[type=file]').on('change', function () {
         files = this.files;
@@ -13,8 +28,10 @@ $(document).ready(function () {
         };
         reader.readAsDataURL(files[0]);
         $('.ajax-reply').html('Выбран: '+files[0].name);
+        showButton()
         // $('#previewImg').attr("src",files[0].name);
     });
+
 
     // обработка и отправка AJAX запроса при клике на кнопку upload_files
     $('#uploadFileButton').on('click', function (event) {
@@ -61,8 +78,8 @@ $(document).ready(function () {
                     $.each(files_path, function (key, val) {
                         html += val + '<br>';
                     })
-
-                    $('.ajax-reply').html(html);
+                    hideButton(html);
+                    // $('.ajax-reply').html(html);
                 }
                 // ошибка
                 else {
