@@ -5,15 +5,28 @@ $(document).ready(function () {
     // заполняем переменную данными, при изменении значения поля file
     $('input[type=file]').on('change', function () {
         files = this.files;
+        if(files == undefined || files.length == 0) return;
+        $('#previewImg').attr("alt",files[0].name);
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            $('#previewImg').attr('src', e.target.result);
+        };
+        reader.readAsDataURL(files[0]);
+        $('.ajax-reply').html('Выбран: '+files[0].name);
+        // $('#previewImg').attr("src",files[0].name);
     });
+
     // обработка и отправка AJAX запроса при клике на кнопку upload_files
-    $('.upload_files').on('click', function (event) {
+    $('#uploadFileButton').on('click', function (event) {
 
         event.stopPropagation(); // остановка всех текущих JS событий
         event.preventDefault();  // остановка дефолтного события для текущего элемента - клик для <a> тега
 
         // ничего не делаем если files пустой
-        if (typeof files == 'undefined') return;
+        if (typeof files == 'undefined') {
+            $('.ajax-reply').html('<font color="red">Для начало необходимо выбрать фото для загрузки.');
+            return;
+        } ;
 
         // создадим объект данных формы
         var data = new FormData();
@@ -44,7 +57,7 @@ $(document).ready(function () {
                 if (typeof respond.error === 'undefined') {
                     // выведем пути загруженных файлов в блок '.ajax-reply'
                     var files_path = respond.files;
-                    var html = '';
+                    var html = 'Загружен: ';
                     $.each(files_path, function (key, val) {
                         html += val + '<br>';
                     })
@@ -67,3 +80,4 @@ $(document).ready(function () {
 
 
 });
+

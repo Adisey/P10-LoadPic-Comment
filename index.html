@@ -10,17 +10,21 @@
 <body>
 
 <div class="loadFile">
-    <div class="previewFIle">
-
+    <div class="previewFile">
+        <label for="upload">
+            <img id="previewImg" src="img/Load.png" alt="Выбрать фото" title="Выбрать фото">
+        </label>
     </div>
     <div class="barLoadFile">
-        <input type="file" accept="image/*">
-        <!--<button style="myButton">Загрузить файл</button>-->
-        <a href="#" class="upload_files button">Загрузить файл</a>
+        <input type="file" accept="image/*" class="hide inputfile" id="upload"/>
+        <button id="uploadFileButton">Загрузить на сервер.</button>
         <div class="ajax-reply"></div>
 
     </div>
 </div>
+
+
+<p></p>
 
 
 </body>
