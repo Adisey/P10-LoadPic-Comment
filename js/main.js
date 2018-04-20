@@ -28,7 +28,7 @@ $(document).ready(function () {
 
         // AJAX запрос
         $.ajax({
-            url: './submit.php',
+            url: './php/submit_lf.php',
             type: 'POST', // важно!
             data: data,
             cache: false,
