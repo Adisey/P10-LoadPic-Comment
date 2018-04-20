@@ -31,7 +31,3 @@
     display: flex;
     flex-direction: column;
 }
-
-.myBtn {
-    cursor: pointer;
-}
