@@ -13,7 +13,8 @@
     /*background-color: gray;*/
     display: flex;
     flex-direction: column;
-    border: 1px black dotted;
+    border: 1px black solid;
+    margin: 20px;
 }
 
 .previewFile {
@@ -70,6 +71,27 @@ label[for="upload"] :hover {
     flex-direction: column;
 }
 
+#myProgress{
+    border-radius: 5px;
+    border: 1px black solid;
+    background-color: #ffffff;
+    opacity: 1;
+    margin: 2px;
+    /*transition: all 2s;*/
+}
+
+#myBar {
+    width: 5%;
+    height: 10px;
+    background-color: #4CAF50;
+    text-align: center; /* To center it horizontally (if you want) */
+    line-height: 10px; /* To center it vertically */
+    color: white;
+    transition: all 0.5s;
+    font-size: 8px;
+}
+
+
 #uploadFileButton {
     top: 5px;
     width: 160px;
@@ -81,4 +103,48 @@ label[for="upload"] :hover {
     font-weight:bolder;
 }
 
-.ajax-reply {}
+.ajax-reply {
+    background-color: white;
+}
+
+
+#inputComment{
+    background-color: #b1d6ff;
+    width: 300px;
+    margin: 20px;
+    border: 2px black solid;
+    padding: 5px;
+}
+h3 {
+    margin: auto;
+}
+
+#userField {
+    width: 100%;
+}
+
+#messField {
+    width: 100%;
+}
+
+#TitlShowComment {
+    width: 300px;
+    margin: 10px;
+    padding: 5px;
+    /*border: 1px black dotted;*/
+}
+#showComment {
+    width: 300px;
+    margin: 20px;
+    padding: 5px;
+    border: 1px black dotted;
+}
+
+.error input,
+.error textarea {
+    border: 1px solid red;
+}
+
+.error {
+    color: red;
+}
