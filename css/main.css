@@ -45,7 +45,7 @@
 label[for="upload"] {
     height: 100%;
     width: 100%;
-    display: inline-block;
+    /*display: inline-block;*/
     cursor: pointer;
     /*padding: 10px 30px;*/
     /*background-color: #4046f5;*/
@@ -131,7 +131,7 @@ h3 {
     width: 300px;
     margin: 10px;
     padding: 5px;
-    align: center;
+    /*align: center;*/
     /*border: 1px black dotted;*/
 }
 

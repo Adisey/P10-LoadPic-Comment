@@ -1,14 +1,13 @@
 var files; // переменная. будет содержать данные файлов
 request = getXMLHttpRequest();
 
-request.onreadystatechange = function() {
+request.onreadystatechange = function () {
     // if (request.readyState == 4) {
     //     alert(request.responseText);
     // };
 };
 
-function getXMLHttpRequest()
-{
+function getXMLHttpRequest() {
     if (window.XMLHttpRequest) {
         return new XMLHttpRequest();
     }
@@ -16,30 +15,18 @@ function getXMLHttpRequest()
     return new ActiveXObject('Microsoft.XMLHTTP');
 }
 
-function showMmessageScreen(dt, user, mes) {
-    // console.log(dt);
-    // console.log(user);
-    // console.log(mes);
-    //Добаляем сверху
-    $("#showComment").prepend("<p>" + mes + "</p>");
-    $("#showComment").prepend("<p><b>" + user + "</b></p>");
-    $("#showComment").prepend('<p align="right"><span>--- ' + dt + " ---</span></p>");
+function showMessageScreen(message) {
+    $("#showComment").prepend("<p>" + message.text + "</p>");
+    $("#showComment").prepend("<p><b>" + message.user + "</b></p>");
+    $("#showComment").prepend('<p align="right"><span>--- ' + message.date + " ---</span></p>");
+}
 
-    // Добаляем снизу
-    // $("#showComment").append("---" + dt + "---<br>");
-    // $("#showComment").append("<p><b>" + user + "</b></p><br>");
-    // $("#showComment").append("<p>" + mes + "</p><br>");
-    // $("#showComment").append("=====================<br>");
-
-// Запись в файл
-    params = "text="+"---" + dt + "---<br>"+"<p><b>" + user + "</b></p><br>"+"<p>" + mes + "</p><br>" + "\n";
+function writeMessageFile(message) {
+    params = "text=" + "---" + message.date + "---<br>" + "<p><b>" + message.user + "</b></p><br>" + "<p>" + message.text + "</p><br>" + "\n";
     request.open('POST', 'php/save_mess.php', true);
     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     request.send(params);
-
-
-
-};
+}
 
 function showError(container, errorMessage) {
     container.className = 'error';
@@ -51,7 +38,7 @@ function showError(container, errorMessage) {
 
 function resetError(container) {
     container.className = '';
-    if (container.lastChild.className == "error-message") {
+    if (container.lastChild.className === "error-message") {
         container.removeChild(container.lastChild);
     }
 }
@@ -65,37 +52,40 @@ function validate(form) {
         showError(elems.from.parentNode, ' Укажите своё имя.');
         valid = false;
     }
-    ;
     resetError(elems.comment.parentNode);
     if (!elems.comment.value) {
         showError(elems.comment.parentNode, ' Отсутствует текст сообщения.');
         valid = false;
     }
-    ;
 
     if (valid) {
         // alert("Проверка пройдена");
-        showMmessageScreen(ruDate(new Date(), 'TS'), elems.from.value, elems.comment.value);
+        var message = {
+            date: ruDate(new Date(), 'TS'),
+            user: elems.from.value,
+            text: elems.comment.value
+        };
+        showMessageScreen(message);
+        writeMessageFile(message);
+        // showMmessageScreen(ruDate(new Date(), 'TS'), elems.from.value, elems.comment.value);
     } else {
         alert("Необходимо заполнить поля.");
     }
-    ;
 
     return valid;
-};
-
+}
 
 /**
  * ruDate - Преобразование даты в удобочитаемый стринг
  * @author Adisey.
  * @param {date} date - входная дата
- * @param {srt} format - "MTZs":
+ * @param {string} format - "MTZs":
  * M - показать месяц в буквеном формате
  * Z - показать твймзону
  * T - показать время
  * S - показать секунды
  * s - показать доли секунд
- * @return {str} result -  возвращаемая стока
+ * @return {string} result -  возвращаемая стока
  */
 function ruDate(date, format) {
     format = (format === undefined) ? '' : format;
@@ -112,7 +102,6 @@ function ruDate(date, format) {
         if (format.indexOf('Z') >= 0) {
             result += ' (GMT' + date.getTimezoneOffset() / 60 + ') ';
         }
-        ;
         if (format.indexOf('T') >= 0) {
             var hh = date.getHours();
             hh = (hh < 10) ? '0' + hh : hh;
@@ -129,9 +118,7 @@ function ruDate(date, format) {
                 }
             }
         }
-        ;
     }
-    ;
 
     return result;
 }
@@ -152,8 +139,8 @@ $(document).ready(function () {
         } else {
             $('#myProgress').css({"opacity": "1"});
         }
-        ;
-    };
+
+    }
 
     function hideButton(stat) {
         if (stat === undefined) stat = "Выберите файл для загрузки.";
@@ -162,14 +149,16 @@ $(document).ready(function () {
 
         $('#previewImg').attr('src', 'img/Load.png');
         $('#previewImg').attr("alt", 'Выберите файл для загрузки.');
+        // $('#previewImg').attr('src', 'img/Load.png');
+        // $('#previewImg').attr("alt", 'Выберите файл для загрузки.');
         $('.ajax-reply').html(stat);
         percentProgress(0);
-    };
+    }
 
     function showButton() {
         $('#uploadFileButton').css({"opacity": "1"});
         $('#uploadFileButton').css({"cursor": "pointer"});
-    };
+    }
 
     // заполняем переменную данными, при изменении значения поля file
     $('input[type=file]').on('change', function () {
@@ -198,8 +187,7 @@ $(document).ready(function () {
         if (typeof files == 'undefined') {
             $('.ajax-reply').html('<color="red">Для начало необходимо выбрать фото для загрузки.');
             return;
-        }
-        ;
+        };
 
         // создадим объект данных формы
         var data = new FormData();
