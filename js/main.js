@@ -1,4 +1,46 @@
 var files; // переменная. будет содержать данные файлов
+request = getXMLHttpRequest();
+
+request.onreadystatechange = function() {
+    // if (request.readyState == 4) {
+    //     alert(request.responseText);
+    // };
+};
+
+function getXMLHttpRequest()
+{
+    if (window.XMLHttpRequest) {
+        return new XMLHttpRequest();
+    }
+
+    return new ActiveXObject('Microsoft.XMLHTTP');
+}
+
+function showMmessageScreen(dt, user, mes) {
+    console.log(dt);
+    console.log(user);
+    console.log(mes);
+    //Добаляем сверху
+    $("#showComment").prepend("<p>" + mes + "</p><br>");
+    $("#showComment").prepend("<p><b>" + user + "</b></p><br>");
+    $("#showComment").prepend("---" + dt + "---<br>");
+
+    // Добаляем снизу
+    // $("#showComment").append("---" + dt + "---<br>");
+    // $("#showComment").append("<p><b>" + user + "</b></p><br>");
+    // $("#showComment").append("<p>" + mes + "</p><br>");
+    // $("#showComment").append("=====================<br>");
+
+// Запись в файл
+    params = "text="+"---" + dt + "---<br>"+"<p><b>" + user + "</b></p><br>"+"<p>" + mes + "</p><br>"
+    // params = "text=111"
+    request.open('POST', 'php/save_mess.php', true);
+    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    request.send(params);
+
+
+
+};
 
 function showError(container, errorMessage) {
     container.className = 'error';
@@ -23,21 +65,77 @@ function validate(form) {
     if (!elems.from.value) {
         showError(elems.from.parentNode, ' Укажите своё имя.');
         valid = false;
-    };
+    }
+    ;
     resetError(elems.comment.parentNode);
     if (!elems.comment.value) {
         showError(elems.comment.parentNode, ' Отсутствует текст сообщения.');
         valid = false;
-    };
+    }
+    ;
 
-    // if (valid) {
-    //     alert("Проверка пройдена");
-    // } else {
-    //     alert("Необходимо заполнить поля.");
-    // };
+    if (valid) {
+        // alert("Проверка пройдена");
+        showMmessageScreen(ruDate(new Date(), 'TS'), elems.from.value, elems.comment.value);
+    } else {
+        alert("Необходимо заполнить поля.");
+    }
+    ;
 
     return valid;
 };
+
+
+/**
+ * ruDate - Преобразование даты в удобочитаемый стринг
+ * @author Adisey.
+ * @param {data} data - входная дата
+ * @param {srt} format - "MTZs":
+ * M - показать месяц в буквеном формате
+ * Z - показать твймзону
+ * T - показать время
+ * S - показать секунды
+ * s - показать доли секунд
+ * @return {str} result -  возвращаемая стока
+ */
+function ruDate(data, format) {
+    format = (format === undefined) ? '' : format;
+    var tmpM;
+    if (format.indexOf('M') < 0) {
+        tmpM = (data.getMonth() + 1);
+        tmpM = '.' + ((tmpM < 10) ? '0' + tmpM : tmpM) + '.';
+    } else {
+        var ruMonth = ["января", "февраля", "марта", "апроеля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+        tmpM = ' ' + ruMonth[data.getMonth()] + ' ';
+    }
+    var result = data.getDate() + tmpM + data.getFullYear();
+    if (format.length > 0) {
+        if (format.indexOf('Z') >= 0) {
+            result += ' (GMT' + data.getTimezoneOffset() / 60 + ') ';
+        }
+        ;
+        if (format.indexOf('T') >= 0) {
+            var hh = data.getHours();
+            hh = (hh < 10) ? '0' + hh : hh;
+            var mm = data.getMinutes();
+            mm = (mm < 10) ? '0' + mm : mm;
+            var ss = data.getSeconds();
+            ss = (ss < 10) ? '0' + ss : ss;
+            //getHours(), getMinutes(), getSeconds(), getMilliseconds()
+            result += ' ' + hh + ':' + mm;
+            if (format.indexOf('S') >= 0) {
+                result += ':' + ss;
+                if (format.indexOf('s') >= 0) {
+                    result += '.' + data.getMilliseconds();
+                }
+            }
+        }
+        ;
+    }
+    ;
+
+    return result;
+}
 
 
 $(document).ready(function () {

@@ -2,7 +2,7 @@
 
 if (isset($_POST['my_file_upload'])) {
 
-    $uploaddir = '../uploads'; // . - текущая папка где находится submit.php
+    $uploaddir = '../uploads'; // . - папка относительно находения submit_lf.php
 
     // cоздадим папку если её нет
     if (!is_dir($uploaddir)) mkdir($uploaddir, 0777);
