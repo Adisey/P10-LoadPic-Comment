@@ -17,13 +17,13 @@ function getXMLHttpRequest()
 }
 
 function showMmessageScreen(dt, user, mes) {
-    console.log(dt);
-    console.log(user);
-    console.log(mes);
+    // console.log(dt);
+    // console.log(user);
+    // console.log(mes);
     //Добаляем сверху
-    $("#showComment").prepend("<p>" + mes + "</p><br>");
-    $("#showComment").prepend("<p><b>" + user + "</b></p><br>");
-    $("#showComment").prepend("---" + dt + "---<br>");
+    $("#showComment").prepend("<p>" + mes + "</p>");
+    $("#showComment").prepend("<p><b>" + user + "</b></p>");
+    $("#showComment").prepend('<p align="right"><span>--- ' + dt + " ---</span></p>");
 
     // Добаляем снизу
     // $("#showComment").append("---" + dt + "---<br>");
@@ -32,8 +32,7 @@ function showMmessageScreen(dt, user, mes) {
     // $("#showComment").append("=====================<br>");
 
 // Запись в файл
-    params = "text="+"---" + dt + "---<br>"+"<p><b>" + user + "</b></p><br>"+"<p>" + mes + "</p><br>"
-    // params = "text=111"
+    params = "text="+"---" + dt + "---<br>"+"<p><b>" + user + "</b></p><br>"+"<p>" + mes + "</p><br>" + "\n";
     request.open('POST', 'php/save_mess.php', true);
     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     request.send(params);
@@ -89,7 +88,7 @@ function validate(form) {
 /**
  * ruDate - Преобразование даты в удобочитаемый стринг
  * @author Adisey.
- * @param {data} data - входная дата
+ * @param {date} date - входная дата
  * @param {srt} format - "MTZs":
  * M - показать месяц в буквеном формате
  * Z - показать твймзону
@@ -98,35 +97,35 @@ function validate(form) {
  * s - показать доли секунд
  * @return {str} result -  возвращаемая стока
  */
-function ruDate(data, format) {
+function ruDate(date, format) {
     format = (format === undefined) ? '' : format;
     var tmpM;
     if (format.indexOf('M') < 0) {
-        tmpM = (data.getMonth() + 1);
+        tmpM = (date.getMonth() + 1);
         tmpM = '.' + ((tmpM < 10) ? '0' + tmpM : tmpM) + '.';
     } else {
         var ruMonth = ["января", "февраля", "марта", "апроеля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
-        tmpM = ' ' + ruMonth[data.getMonth()] + ' ';
+        tmpM = ' ' + ruMonth[date.getMonth()] + ' ';
     }
-    var result = data.getDate() + tmpM + data.getFullYear();
+    var result = date.getDate() + tmpM + date.getFullYear();
     if (format.length > 0) {
         if (format.indexOf('Z') >= 0) {
-            result += ' (GMT' + data.getTimezoneOffset() / 60 + ') ';
+            result += ' (GMT' + date.getTimezoneOffset() / 60 + ') ';
         }
         ;
         if (format.indexOf('T') >= 0) {
-            var hh = data.getHours();
+            var hh = date.getHours();
             hh = (hh < 10) ? '0' + hh : hh;
-            var mm = data.getMinutes();
+            var mm = date.getMinutes();
             mm = (mm < 10) ? '0' + mm : mm;
-            var ss = data.getSeconds();
+            var ss = date.getSeconds();
             ss = (ss < 10) ? '0' + ss : ss;
             //getHours(), getMinutes(), getSeconds(), getMilliseconds()
             result += ' ' + hh + ':' + mm;
             if (format.indexOf('S') >= 0) {
                 result += ':' + ss;
                 if (format.indexOf('s') >= 0) {
-                    result += '.' + data.getMilliseconds();
+                    result += '.' + date.getMilliseconds();
                 }
             }
         }
@@ -207,11 +206,11 @@ $(document).ready(function () {
 
         // заполняем объект данных файлами в подходящем для отправки формате
         $.each(files, function (key, value) {
-            data.append(key, value);
+            date.append(key, value);
         });
 
         // добавим переменную для идентификации запроса
-        data.append('my_file_upload', 1);
+        date.append('my_file_upload', 1);
 
         // AJAX запрос
         percentProgress(99.9);
