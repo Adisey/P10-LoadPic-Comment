@@ -34,31 +34,49 @@ function CreateMessage(user, text) {
 }
 
 function test() {
-    creaJSONobj();
+    // creaJSONDB();
+    readJSONDB();
 }
 
-
-function creaJSONobj() {
-    var oneMess = new CreateMessage('User 1', 'О сколько нам открытий чудных готовит просвещенья дух.');
-    console.log(oneMess);
+function creaJSONDB() {
+    // var oneMess = new CreateMessage('User 1', 'О сколько нам открытий чудных готовит просвещенья дух.');
+    // console.log(oneMess);
     var allMessage = {};
     for (var i = 1; i <= 10; i++) {
         // allMessage[i] = oneMess;
-        allMessage[i] = new CreateMessage('User '+i, 'О сколько нам открытий чудных готовит просвещенья дух.');
+        allMessage[i] = new CreateMessage('User ' + i, 'О сколько нам открытий чудных готовит просвещенья дух.');
     }
     console.log(allMessage);
 
-
-
     var Mess_json = JSON.stringify(allMessage);
-    $.ajax({
+    $.post({
         url: 'php/writejson.php',
-        type: 'POST',
+        // dataType: 'json', // лишние патаметры
+        // type: 'POST',     // лишние патаметры
         data: {myJson: Mess_json, fileName: '../uploads/message.json'},
     });
+}
 
+function readJSONDB() {
+    var allMessage = {};
+    var allMessageJSON;
+    $.getJSON('./uploads/message.json', function (allMessageJSON) {
+        console.log(allMessageJSON);
+        showAllMess(allMessageJSON);
+    });
+}
 
-
+function showAllMess(message) {
+    console.log(message);
+    for (key in message) {
+        message[key].date=new Date(message[key].date);
+    }
+    console.log(message);
+    for (key in message) {
+        console.log(key);
+        console.log(message[key]);
+        showNewMessageScreen(message[key]);
+    }
 }
 
 function getXMLHttpRequest() {

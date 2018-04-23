@@ -8,60 +8,59 @@
     <script src="js/main.js"></script>
 </head>
 <body>
-
-<div class="loadFile">
-    <div class="previewFile">
-        <label for="upload">
-            <img id="previewImg" src="img/Load.png" alt="Выбрать фото" title="Выбрать фото">
-        </label>
-    </div>
-    <div class="barLoadFile">
-        <input type="file" accept="image/*" class="hide inputfile" id="upload"/>
-        <div id="myProgress">
-            <div id="myBar">5%</div>
+<div id="main">
+    <div id="boxLoadFile">
+        <div class="TitleBox">
+            <h3>Загрузка файлов</h3>
         </div>
+        <div class="loadFile">
+            <div class="previewFile">
+                <label for="upload">
+                    <img id="previewImg" src="img/Load.png" alt="Выбрать фото" title="Выбрать фото">
+                </label>
+            </div>
+            <div class="barLoadFile">
+                <input type="file" accept="image/*" class="hide inputfile" id="upload"/>
+                <div id="myProgress">
+                    <div id="myBar">5%</div>
+                </div>
 
-        <!--<progress max="100" value="25" id="progress"></progress>-->
-        <button id="uploadFileButton">Загрузить на сервер</button>
-        <div class="ajax-reply"></div>
+                <!--<progress max="100" value="25" id="progress"></progress>-->
+                <button id="uploadFileButton">Загрузить на сервер</button>
+                <div class="ajax-reply"></div>
 
+            </div>
+        </div>
+    </div>
+    <div id="boxWriteComments">
+        <div class="TitleBox">
+            <h3>Отправка комментариев</h3>
+        </div>
+        <div id="inputComment">
+            <h3>Отправка комментария на сервер</h3>
+            <form>
+                <p><b>Ваше имя:</b><br>
+                    <input type="text" name="from" id="userField" placeholder="Петя">
+                </p>
+                <p><b>Комментарий</b><br>
+                    <textarea name="comment" id='messField' rows="3" placeholder="Афтар писшы исчё!"></textarea></p>
+                <p>
+                    <input type="button" value="Отправить" onclick="validate(this.form)">
+                    <input type="reset" value="Очистить">
+                    <input type="button" value="Test" onclick="test()">
+                </p>
+            </form>
+
+        </div>
+    </div>
+    <div id="boxComment">
+        <div class="TitleBox">
+            <h3>Отправленные комментарии</h3>
+        </div>
+        <div id="showComment">
+        </div>
     </div>
 </div>
-<div id="inputComment">
-    <h3>Отправка комментария на сервер</h3>
-    <form>
-        <!--name="test">-->
-        <!--method="post">-->
-        <!--action="input1.php">-->
-        <p><b>Ваше имя:</b><br>
-            <input type="text" name="from" id="userField" placeholder="Петя">
-        </p>
-        <p><b>Комментарий</b><br>
-            <textarea name="comment" id='messField' rows="3" placeholder="Афтар писшы исчё!"></textarea></p>
-        <p>
-            <input type="button" value="Отправить" onclick="validate(this.form)">
-            <input type="reset" value="Очистить">
-            <input type="button" value="Test" onclick="test()">
-        </p>
-    </form>
-
-</div>
-<div id="TitlShowComment">
-    <h3>Отправленные комментарии</h3>
-</div>
-
-<div id="showComment">
-
-
-</div>
-
-<!--<script>-->
-    <!--function validate(form) {-->
-        <!--var elems = form.elements;-->
-        <!--alert('Нажато отправить!');-->
-<!--// return false;-->
-    <!--};-->
-<!--</script>-->
 
 </body>
 </html>
