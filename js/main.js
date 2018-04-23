@@ -1,31 +1,102 @@
 var files; // переменная. будет содержать данные файлов
 request = getXMLHttpRequest();
 
+
 request.onreadystatechange = function () {
     // if (request.readyState == 4) {
     //     alert(request.responseText);
     // };
+    switch (request.readyState) {
+        case 0:
+            // console.log('0 - UNSENT - Объект был создан. Метод open() ещё не вызывался.');
+            break;
+        case 1:
+            // console.log('1 - OPENED - Метод open() был вызван.');
+            break;
+        case 2:
+            // console.log('2 - HEADERS_RECEIVED - Метод send() был вызван, доступны заголовки (headers) и статус.');
+            break;
+        case 3:
+            // console.log('3 - LOADING - Загрузка; responseText содержит частичные данные.');
+            break;
+        case 4:
+            console.log('4 - DONE - Операция полностью завершена.');
+            break;
+        default:
+            console.log('Значение: "' + request.readyState + '" + с значением "' + request.responseText + '" мне не знакомо. ((');
+    }
 };
+
+function CreateMessage(user, text) {
+    this.date = new Date();
+    this.user = user;
+    this.text = text;
+}
+
+function test() {
+    creaJSONobj();
+}
+
+function creaJSONobj() {
+    var oneMess = new CreateMessage('User 1', 'О сколько нам открытий чудных готовит просвещенья дух.');
+    console.log(oneMess);
+    var allMessage = {};
+    for (var i = 1; i <= 10; i++) {
+        // allMessage[i] = oneMess;
+        allMessage[i] = new CreateMessage('User '+i, 'О сколько нам открытий чудных готовит просвещенья дух.');
+    }
+    console.log(allMessage);
+
+
+
+    var Mess_json = JSON.stringify(allMessage);
+    $.ajax({
+        url: 'php/writejson.php',
+        type: 'POST',
+        data: {myJson: Mess_json, fileName: '../uploads/message.json'},
+    });
+
+
+
+}
 
 function getXMLHttpRequest() {
     if (window.XMLHttpRequest) {
         return new XMLHttpRequest();
     }
-
     return new ActiveXObject('Microsoft.XMLHTTP');
 }
 
-function showMessageScreen(message) {
+function showNewMessageScreen(message) {
     $("#showComment").prepend("<p>" + message.text + "</p>");
     $("#showComment").prepend("<p><b>" + message.user + "</b></p>");
-    $("#showComment").prepend('<p align="right"><span>--- ' + message.date + " ---</span></p>");
+    $("#showComment").prepend('<p align="right"><span>--- ' + ruDate(message.date, 'TS') + " ---</span></p>");
 }
 
 function writeMessageFile(message) {
-    params = "text=" + "---" + message.date + "---<br>" + "<p><b>" + message.user + "</b></p><br>" + "<p>" + message.text + "</p><br>" + "\n";
+    params = "text=" + "-" + ruDate(message.date, 'TS') + "-<br>" + "<p><b>" + message.user + "</b></p><br>" + "<p>" + message.text + "</p><br>" + "\n";
     request.open('POST', 'php/save_mess.php', true);
     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     request.send(params);
+}
+
+function lastJSONmessage(message) {
+    var message_json = JSON.stringify(message);
+    console.log(message);
+    console.log(message_json);
+    // $.ajax({
+    //     url: 'data.php',
+    //     type: 'POST',
+    //     data: {myJson: message_json, fileName: 'lastmessage.json'},
+    // });
+
+    $.ajax({
+        url: 'php/writejson.php',
+        type: 'POST',
+        data: {myJson: message_json, fileName: '../uploads/lastmessage.json'},
+    });
+
+
 }
 
 function showError(container, errorMessage) {
@@ -61,13 +132,14 @@ function validate(form) {
     if (valid) {
         // alert("Проверка пройдена");
         var message = {
-            date: ruDate(new Date(), 'TS'),
+            // date: ruDate(new Date(), 'TS'),
+            date: new Date(),
             user: elems.from.value,
             text: elems.comment.value
         };
-        showMessageScreen(message);
+        showNewMessageScreen(message);
         writeMessageFile(message);
-        // showMmessageScreen(ruDate(new Date(), 'TS'), elems.from.value, elems.comment.value);
+        lastJSONmessage(message);
     } else {
         alert("Необходимо заполнить поля.");
     }
@@ -187,7 +259,8 @@ $(document).ready(function () {
         if (typeof files == 'undefined') {
             $('.ajax-reply').html('<color="red">Для начало необходимо выбрать фото для загрузки.');
             return;
-        };
+        }
+        ;
 
         // создадим объект данных формы
         var data = new FormData();
