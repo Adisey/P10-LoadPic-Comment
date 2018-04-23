@@ -37,6 +37,7 @@ function test() {
     creaJSONobj();
 }
 
+
 function creaJSONobj() {
     var oneMess = new CreateMessage('User 1', 'О сколько нам открытий чудных готовит просвещенья дух.');
     console.log(oneMess);
