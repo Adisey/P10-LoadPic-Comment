@@ -124,15 +124,27 @@ label[for="upload"] :hover {
     margin: 20px;
     border: 2px black solid;
     padding: 5px;
-    height: 150px;
+    height: 220px;
+}
+
+#messegeForm {
+    height: 100%;
 }
 
 #userField {
-    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 #messField {
     width: 100%;
+}
+
+#messButtonBar {
+    margin: 5px;
+    /*border: 2px black solid;*/
+    padding: 5px;
+    /*align-self: end;*/
 }
 
 .TitleBox {
@@ -153,15 +165,49 @@ h3 {
     border: 1px black dotted;
 }
 
+.showOneComent {
+    background-color: #e3e3e3;
+
+}
+
+.showOneComent :hover {
+    background-color: #d4d4d4;
+    transition: all 0.5s;
+}
+
 #showComment span {
     font-style: italic;
     font-size: 75%;
-    opacity: 0;
+    opacity: 0.3;
     transition: all 0.5s;
 }
 
 #showComment span:hover {
     opacity: 1;
+}
+
+.warningLoad {
+    color: rgb(255, 0, 0);
+    text-shadow: 0 -1px rgba(200, 0, 0, .1);
+    /*background: #000000;*/
+    -webkit-animation: pulsate 1.2s linear infinite;
+    animation: pulsate 1.2s linear infinite;
+    margin: auto;
+    text-align: center;
+}
+
+@-webkit-keyframes pulsate {
+    50% {
+        color: #fff;
+        text-shadow: 0 -1px rgba(200, 0, 0, .3), 0 0 5px #ffd, 0 0 8px #fff;
+    }
+}
+
+@keyframes pulsate {
+    50% {
+        color: #fff;
+        text-shadow: 0 -1px rgba(200, 0, 0, .3), 0 0 5px #ffd, 0 0 8px #fff;
+    }
 }
 
 .error input,

@@ -1,7 +1,14 @@
 var files; // переменная. будет содержать данные файлов
 request = getXMLHttpRequest();
+var maxCountOnStep = 5; // Колличество сообщений при единоразовой выгрузке
+var countOnPage = 5; // Колличество сообщений которые должны присудствовать на экране ( после прокрутки)
 
+// Для эконрмии памяти будем держать это в локальных переменных
+// var allMessageCount = 0; // Общее колличество отправленных сообщений
+// var allMessage = {}; // Все отправленные сообщения
+// var indexMessage = []; // Идекс для записей
 
+// Инфомируем об сообщениях AJAX
 request.onreadystatechange = function () {
     // if (request.readyState == 4) {
     //     alert(request.responseText);
@@ -27,28 +34,39 @@ request.onreadystatechange = function () {
     }
 };
 
+
+// Функция созания объекта с новым сообщением
 function CreateMessage(user, text) {
     this.date = new Date();
     this.user = user;
     this.text = text;
 }
 
+// Тестовая (весит на кнопке)
 function test() {
-    // creaJSONDB();
-    readJSONDB();
+    creaJSONDB(); // автоматическое создание сообщений.
+    // readJSONDBShowMessage(); // Вычитка документов из базы и отображение сообщений на страницу
+}
+// автоматическое создание сообщений для новой DB.
+function creaJSONDB() {
+    var allMessageTmp = {};
+    var oneMessageTmp = {};
+    //var indexMessage = []; // на этапе создания индекс не нужен
+    var idMessage;
+    for (var i = 0; i <= 23; i++) {
+        oneMessageTmp = new CreateMessage('User ' + i, 'О сколько нам открытий чудных, готовят просвещенья дух, и Опыт, сын ошибок трудных, и Гений, парадоксов друг,и Случай, бог изобретатель');
+        // Date.now(oneMessageTmp.date) используется в объекте, и в посдедствии в JSON ДБ ;-), как ID
+        idMessage = Date.now(oneMessageTmp.date) + i; // так как весь массив генериться менее чем за 0.001 сек. ;-)
+        // indexMessage[i] = idMessage; // на этапе создания индекс не нужен
+        allMessageTmp[idMessage] = oneMessageTmp;
+    }
+    // console.log(allMessageTmp);
+    writeJSONDBf(allMessageTmp);
 }
 
-function creaJSONDB() {
-    // var oneMess = new CreateMessage('User 1', 'О сколько нам открытий чудных готовит просвещенья дух.');
-    // console.log(oneMess);
-    var allMessage = {};
-    for (var i = 1; i <= 10; i++) {
-        // allMessage[i] = oneMess;
-        allMessage[i] = new CreateMessage('User ' + i, 'О сколько нам открытий чудных готовит просвещенья дух.');
-    }
-    console.log(allMessage);
-
-    var Mess_json = JSON.stringify(allMessage);
+// Запись Объекта с сообщениями в JSON DB
+function writeJSONDBf(OkAllMessage) {
+    var Mess_json = JSON.stringify(OkAllMessage);
     $.post({
         url: 'php/writejson.php',
         // dataType: 'json', // лишние патаметры
@@ -57,19 +75,90 @@ function creaJSONDB() {
     });
 }
 
-function readJSONDB() {
-    var allMessage = {};
+// Вычитка из базы и отображене результатов.
+// Если получаем параметр с новым сообщением добаляем в общий массив, отобоажаем с ним, и обновляем базу.
+function readJSONDBShowMessage(newMessage) {
     var allMessageJSON;
+    var MessageIndex;
+    var fileExist = true;
+    var showComment = $('#showComment');
+    showComment.html('<div class="warningLoad">Загрузка<div>');
     $.getJSON('./uploads/message.json', function (allMessageJSON) {
-        console.log(allMessageJSON);
-        showAllMess(allMessageJSON);
-    });
+        // updateData - Апдейтим Дату и создаём индекс получаем: массив MessageIndex [obj Mass, масив index ]
+        MessageIndex = updateData(allMessageJSON);
+        // return MessageIndex;
+    })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            console.log('getJSON - failed (request failed!) ' + textStatus);
+            fileExist = false;
+        })
+        .done(function () {
+            console.log('getJSON - done (second success)');
+        })
+        .always(function () {
+            console.log('getJSON - always (complete "FAIL" or "DONE")');
+            if (newMessage !== undefined) {
+                var index = (fileExist) ? MessageIndex[1].length : 0;
+                var idMessage = Date.now(newMessage.date);
+                if (fileExist) {
+                    MessageIndex[0][idMessage] = newMessage;    // добавляем в массив объект с собщением
+                    MessageIndex[1][index] = idMessage;         // добавляем в массив массив с индексом
+                } else {
+                    MessageIndex = {};
+                    var allMessageTmp = {};
+                    allMessageTmp[idMessage] = newMessage;
+                    MessageIndex[0] = allMessageTmp;     // добавляем в массив объект с собщением
+                    var indexTMP = [];
+                    indexTMP[index] = idMessage;
+                    MessageIndex[1] = indexTMP;         // добавляем в массив массив с индексом
+                }
+                // Запись в JSON базу
+                console.log(MessageIndex[0]);
+                writeJSONDBf(MessageIndex[0]);
+            }
+            console.log(MessageIndex);
+            showTopMess(MessageIndex, countOnPage); // Отображение сообщений на страницу
+            $("div.warningLoad").remove();
+        })
 }
 
+// Апдейтим Дату из текста и создание индекса
+function updateData(obj) {
+    var i = 0;
+    var index = [];
+    for (key in obj) {
+        obj[key].date = new Date(obj[key].date);
+        index[i] = key;
+        i++;
+    }
+    return [obj, index];
+}
+
+// Отображение последних 10 сообщений
+function showTopMess(TmpMessageIndex, TmpCountOnPage) {
+    var showComment = $('#showComment');
+    if (TmpMessageIndex === undefined) {
+        showComment.append('Комментариев нет.');
+    } else {
+        var currentMessage = TmpMessageIndex[1].length;
+        var TmpcountOnPage = countOnPage;
+        while (currentMessage && TmpcountOnPage) { // при currentMessage, равном 0, значение в скобках будет false и цикл остановится
+            // var aa = TmpMessageIndex[1][currentMessage-1];    // индекс сообщения
+            // var bb = TmpMessageIndex[0][aa];                // само сообщение
+            // showOneMessageScreen(bb);
+            showOneMessageScreen(TmpMessageIndex[0][TmpMessageIndex[1][currentMessage - 1]]);
+            currentMessage--;
+            TmpcountOnPage--;
+        }
+    }
+}
+
+
+// Отовизм потом убить
 function showAllMess(message) {
     console.log(message);
     for (key in message) {
-        message[key].date=new Date(message[key].date);
+        message[key].date = new Date(message[key].date);
     }
     console.log(message);
     for (key in message) {
@@ -86,11 +175,25 @@ function getXMLHttpRequest() {
     return new ActiveXObject('Microsoft.XMLHTTP');
 }
 
+// Отовизм заменять будем в связи с тем, что перед выдачей, нужно вычитать сообщения из базы.
 function showNewMessageScreen(message) {
     $("#showComment").prepend("<p>" + message.text + "</p>");
     $("#showComment").prepend("<p><b>" + message.user + "</b></p>");
     $("#showComment").prepend('<p align="right"><span>--- ' + ruDate(message.date, 'TS') + " ---</span></p>");
 }
+
+// Отобразить одно сообщение Отовизм
+function showOneMessageScreen(message) {
+    var showComment = $('#showComment');
+    showComment.append(
+        '<div class="showOneComent">' +
+        '<p align="right"><span>--- ' + ruDate(message.date, 'TS') + ' ---</span></p>' +
+        '<p><b>' + message.user + '</b></p>' +
+        '<p>' + message.text + '</p>' +
+        '</div>');
+
+}
+
 
 function writeMessageFile(message) {
     params = "text=" + "-" + ruDate(message.date, 'TS') + "-<br>" + "<p><b>" + message.user + "</b></p><br>" + "<p>" + message.text + "</p><br>" + "\n";
@@ -133,8 +236,8 @@ function resetError(container) {
     }
 }
 
-
-function validate(form) {
+// Проверяем правилность Формы и в слкчае успеха зпускаем обновдене списка и запись в базу
+function validateShowMessage(form) {
     var elems = form.elements;
     var valid = true;
     resetError(elems.from.parentNode);
@@ -147,22 +250,22 @@ function validate(form) {
         showError(elems.comment.parentNode, ' Отсутствует текст сообщения.');
         valid = false;
     }
-
     if (valid) {
-        // alert("Проверка пройдена");
+        console.log("Проверка пройдена");
         var message = {
             // date: ruDate(new Date(), 'TS'),
             date: new Date(),
             user: elems.from.value,
             text: elems.comment.value
         };
-        showNewMessageScreen(message);
-        writeMessageFile(message);
-        lastJSONmessage(message);
-    } else {
-        alert("Необходимо заполнить поля.");
-    }
+        readJSONDBShowMessage(message);
 
+//        showNewMessageScreen(message); //Отовизм убрать
+        writeMessageFile(message);  //Отовизм убрать
+        lastJSONmessage(message);   //Отовизм убрать
+    } else {
+        // alert("Необходимо заполнить поля.");
+    }
     return valid;
 }
 
@@ -218,6 +321,7 @@ function ruDate(date, format) {
 $(document).ready(function () {
     hideButton();
     percentProgress(0);
+    readJSONDBShowMessage();
 
     function percentProgress(pp) {
         if (pp === undefined) pp = 0;
@@ -275,7 +379,7 @@ $(document).ready(function () {
         percentProgress(70);
 
         // ничего не делаем если files пустой
-        if (typeof files == 'undefined') {
+        if (typeof files === 'undefined') {
             $('.ajax-reply').html('<color="red">Для начало необходимо выбрать фото для загрузки.');
             return;
         }
