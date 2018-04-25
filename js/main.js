@@ -327,7 +327,6 @@ $(window).scroll(function () {
     console.log('aa- ' + scrolled);
     textScroll.append('<p>111</p>');
     // $('.textScroll').html = '<p> от - '+who +' '+ scrolled + 'px </p>';
-
 })
 
 $(document).ready(function () {
@@ -339,7 +338,6 @@ $(document).ready(function () {
     // $(window).onwheel = myScroll('m');
     // document.getElementById('showComment').addEventListener('scroll', myScroll('D'),false);
     // $(window).scroll(myScroll('SS'));
-
 
     // function myScroll(who) {
     //     var textScroll = $('#textScroll');
