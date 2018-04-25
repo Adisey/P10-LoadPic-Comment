@@ -1,7 +1,8 @@
 var files; // переменная. будет содержать данные файлов
 request = getXMLHttpRequest();
-var maxCountOnStep = 5; // Колличество сообщений при единоразовой выгрузке
-var countOnPage = 5; // Колличество сообщений которые должны присудствовать на экране ( после прокрутки)
+var maxCountOnStep = 10;     // Колличество сообщений при единоразовой выгрузке
+var spepSroll = 3;          // Шаг прокрутки
+var countOnPage = maxCountOnStep;        // Колличество сообщений которые должны присудствовать на экране ( после прокрутки)
 
 // Для эконрмии памяти будем держать это в локальных переменных
 // var allMessageCount = 0; // Общее колличество отправленных сообщений
@@ -318,19 +319,47 @@ function ruDate(date, format) {
 
     return result;
 }
+$(window).scroll(function () {
+    var textScroll = $('#textScroll');
+    // textScroll.html('222');
+    // var scrolled = window.pageYOffset || document.documentElement.scrollTop;
+    // document.getElementById('showScroll').innerHTML = scrolled + 'px';
+    console.log('aa- ' + scrolled);
+    textScroll.append('<p>111</p>');
+    // $('.textScroll').html = '<p> от - '+who +' '+ scrolled + 'px </p>';
 
+})
 
 $(document).ready(function () {
     hideButton();
     percentProgress(0);
     readJSONDBShowMessage();
+    //myScroll('on load');
+    // $(window).onscroll = myScroll('s');
+    // $(window).onwheel = myScroll('m');
+    // document.getElementById('showComment').addEventListener('scroll', myScroll('D'),false);
+    // $(window).scroll(myScroll('SS'));
+
+
+    // function myScroll(who) {
+    //     var textScroll = $('#textScroll');
+    //     // textScroll.html('222');
+    //     var scrolled = window.pageYOffset || document.documentElement.scrollTop;
+    //     // document.getElementById('showScroll').innerHTML = scrolled + 'px';
+    //     console.log(who + ' ' + scrolled);
+    //     textScroll.append('<p> от - '+who +' '+ scrolled + 'px </p>');
+    //     // $('.textScroll').html = '<p> от - '+who +' '+ scrolled + 'px </p>';
+    //
+    // }
+
 
     function percentProgress(pp) {
         if (pp === undefined || pp < 0) pp = 0;
         if (pp > 100) pp = 100;
+        var myProgress = $('#myProgress');
         switch (pp) {
             case 0:
-                $('#myProgress').css({
+                myProgress.css({
                     "opacity": "0",
                     "transition": "all 0;"
                 });
@@ -349,7 +378,7 @@ $(document).ready(function () {
                 }, 1500);
                 break;
             default:
-                $('#myProgress').css({
+                myProgress.css({
                     "opacity": "1",
                     "transition": "all 0.3s;"
                 });

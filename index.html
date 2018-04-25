@@ -38,11 +38,11 @@
             <h3>Отправка комментария на сервер</h3>
             <form id="messegeForm">
                 <div>
-                <p><b>Ваше имя:</b><br>
-                    <input type="text" name="from" id="userField" placeholder="Петя">
-                </p>
-                <p><b>Комментарий</b><br>
-                    <textarea name="comment" id='messField' rows="3" placeholder="Афтар писшы исчё!"></textarea></p>
+                    <p><b>Ваше имя:</b><br>
+                        <input type="text" name="from" id="userField" placeholder="Петя">
+                    </p>
+                    <p><b>Комментарий</b><br>
+                        <textarea name="comment" id='messField' rows="3" placeholder="Афтар писшы исчё!"></textarea></p>
                 </div>
                 <div id="messButtonBar">
                     <input type="button" value="Отправить" onclick="validateShowMessage(this.form)">
@@ -56,12 +56,15 @@
         <div class="TitleBox">
             <h3>Отправленные комментарии</h3>
         </div>
+        <div id="textScroll">
+            <p>Start!</p>
+        </div>
         <div id="showComment">
             <!--<div class="warningLoad">Загрузка<div>-->
             <!--<div class="showOneComent">-->
-                <!--<p><b>ldldld</b></p>-->
-                <!--<p>Alter, emeritis toruss rare anhelare de audax, raptus luba.Cum vox crescere, omnes parses aperto-->
-                    <!--noster, regius nutrixes.Prarere diligenter ducunt ad ferox magister.</p>-->
+            <!--<p><b>ldldld</b></p>-->
+            <!--<p>Alter, emeritis toruss rare anhelare de audax, raptus luba.Cum vox crescere, omnes parses aperto-->
+            <!--noster, regius nutrixes.Prarere diligenter ducunt ad ferox magister.</p>-->
             <!--</div>-->
         </div>
     </div>
