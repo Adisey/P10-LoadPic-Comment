@@ -47,6 +47,7 @@ function test() {
     creaJSONDB(); // автоматическое создание сообщений.
     // readJSONDBShowMessage(); // Вычитка документов из базы и отображение сообщений на страницу
 }
+
 // автоматическое создание сообщений для новой DB.
 function creaJSONDB() {
     var allMessageTmp = {};
@@ -89,7 +90,7 @@ function readJSONDBShowMessage(newMessage) {
         // return MessageIndex;
     })
         .fail(function (jqXHR, textStatus, errorThrown) {
-            console.log('getJSON - failed (request failed!) ' + textStatus);
+            console.log('getJSON - failed (request failed!) ' + textStatus + '(' + errorThrown + ')');
             fileExist = false;
         })
         .done(function () {
@@ -155,18 +156,18 @@ function showTopMess(TmpMessageIndex, TmpCountOnPage) {
 
 
 // Отовизм потом убить
-function showAllMess(message) {
-    console.log(message);
-    for (key in message) {
-        message[key].date = new Date(message[key].date);
-    }
-    console.log(message);
-    for (key in message) {
-        console.log(key);
-        console.log(message[key]);
-        showNewMessageScreen(message[key]);
-    }
-}
+// function showAllMess(message) {
+//     console.log(message);
+//     for (key in message) {
+//         message[key].date = new Date(message[key].date);
+//     }
+//     console.log(message);
+//     for (key in message) {
+//         console.log(key);
+//         console.log(message[key]);
+//         showNewMessageScreen(message[key]);
+//     }
+// }
 
 function getXMLHttpRequest() {
     if (window.XMLHttpRequest) {
@@ -176,13 +177,13 @@ function getXMLHttpRequest() {
 }
 
 // Отовизм заменять будем в связи с тем, что перед выдачей, нужно вычитать сообщения из базы.
-function showNewMessageScreen(message) {
-    $("#showComment").prepend("<p>" + message.text + "</p>");
-    $("#showComment").prepend("<p><b>" + message.user + "</b></p>");
-    $("#showComment").prepend('<p align="right"><span>--- ' + ruDate(message.date, 'TS') + " ---</span></p>");
-}
+// function showNewMessageScreen(message) {
+//     $("#showComment").prepend("<p>" + message.text + "</p>");
+//     $("#showComment").prepend("<p><b>" + message.user + "</b></p>");
+//     $("#showComment").prepend('<p align="right"><span>--- ' + ruDate(message.date, 'TS') + " ---</span></p>");
+// }
 
-// Отобразить одно сообщение Отовизм
+// Отобразить одно сообщение
 function showOneMessageScreen(message) {
     var showComment = $('#showComment');
     showComment.append(
@@ -194,32 +195,33 @@ function showOneMessageScreen(message) {
 
 }
 
+// Отовизм убить
+// function writeMessageFile(message) {
+//     params = "text=" + "-" + ruDate(message.date, 'TS') + "-<br>" + "<p><b>" + message.user + "</b></p><br>" + "<p>" + message.text + "</p><br>" + "\n";
+//     request.open('POST', 'php/save_mess.php', true);
+//     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+//     request.send(params);
+// }
 
-function writeMessageFile(message) {
-    params = "text=" + "-" + ruDate(message.date, 'TS') + "-<br>" + "<p><b>" + message.user + "</b></p><br>" + "<p>" + message.text + "</p><br>" + "\n";
-    request.open('POST', 'php/save_mess.php', true);
-    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    request.send(params);
-}
-
-function lastJSONmessage(message) {
-    var message_json = JSON.stringify(message);
-    console.log(message);
-    console.log(message_json);
-    // $.ajax({
-    //     url: 'data.php',
-    //     type: 'POST',
-    //     data: {myJson: message_json, fileName: 'lastmessage.json'},
-    // });
-
-    $.ajax({
-        url: 'php/writejson.php',
-        type: 'POST',
-        data: {myJson: message_json, fileName: '../uploads/lastmessage.json'},
-    });
-
-
-}
+// Отовизм убить
+// function lastJSONmessage(message) {
+//     var message_json = JSON.stringify(message);
+//     console.log(message);
+//     console.log(message_json);
+//     // $.ajax({
+//     //     url: 'data.php',
+//     //     type: 'POST',
+//     //     data: {myJson: message_json, fileName: 'lastmessage.json'},
+//     // });
+//
+//     $.ajax({
+//         url: 'php/writejson.php',
+//         type: 'POST',
+//         data: {myJson: message_json, fileName: '../uploads/lastmessage.json'},
+//     });
+//
+//
+// }
 
 function showError(container, errorMessage) {
     container.className = 'error';
@@ -261,8 +263,8 @@ function validateShowMessage(form) {
         readJSONDBShowMessage(message);
 
 //        showNewMessageScreen(message); //Отовизм убрать
-        writeMessageFile(message);  //Отовизм убрать
-        lastJSONmessage(message);   //Отовизм убрать
+//        writeMessageFile(message);  //Отовизм убрать
+//        lastJSONmessage(message);   //Отовизм убрать
     } else {
         // alert("Необходимо заполнить поля.");
     }
@@ -324,49 +326,80 @@ $(document).ready(function () {
     readJSONDBShowMessage();
 
     function percentProgress(pp) {
-        if (pp === undefined) pp = 0;
-        if (pp < 0) pp = 0;
+        if (pp === undefined || pp < 0) pp = 0;
         if (pp > 100) pp = 100;
-        $('#myBar').css({"width": pp + "%"});
-        $('#myBar').html(pp + "%");
-        if ((pp === 0) || (pp === 100)) {
-            $('#myProgress').css({"opacity": "0"});
-        } else {
-            $('#myProgress').css({"opacity": "1"});
+        switch (pp) {
+            case 0:
+                $('#myProgress').css({
+                    "opacity": "0",
+                    "transition": "all 0;"
+                });
+                break;
+            case 100:
+                setTimeout(function () {
+                    $('#myProgress').css({
+                        "opacity": "0",
+                        "transition": "all 0.3s;"
+                    });
+                }, 500);
+                setTimeout(function () {
+                    var myBar = $('#myBar');
+                    myBar.css({"width": "0%"});
+                    myBar.html("0%");
+                }, 1500);
+                break;
+            default:
+                $('#myProgress').css({
+                    "opacity": "1",
+                    "transition": "all 0.3s;"
+                });
+                break;
         }
-
+        var myBar = $('#myBar');
+        myBar.css({"width": pp + "%"});
+        myBar.html(pp + "%");
     }
 
     function hideButton(stat) {
-        if (stat === undefined) stat = "Выберите файл для загрузки.";
-        $('#uploadFileButton').css({"opacity": "0"});
-        $('#uploadFileButton').css({"cursor": "default"});
-
-        $('#previewImg').attr('src', 'img/Load.png');
-        $('#previewImg').attr("alt", 'Выберите файл для загрузки.');
-        // $('#previewImg').attr('src', 'img/Load.png');
-        // $('#previewImg').attr("alt", 'Выберите файл для загрузки.');
-        $('.ajax-reply').html(stat);
-        percentProgress(0);
+        $('#uploadFileButton').css({
+            "opacity": "0",
+            "cursor": "default"
+        });
+        $('#previewImg').attr(
+            'src', 'img/Load.png',
+            "alt", 'Выберите файл для загрузки.'
+        );
+        var infoPanel = $('.infoPanel');
+        var defaultStatus = "Выберите файл для загрузки.";
+        if (stat === undefined) {
+            infoPanel.html(defaultStatus);
+        } else {
+            infoPanel.html(stat);
+            setTimeout(function () {
+                infoPanel.html(defaultStatus)
+            }, 5000);
+        }
     }
 
     function showButton() {
-        $('#uploadFileButton').css({"opacity": "1"});
-        $('#uploadFileButton').css({"cursor": "pointer"});
+        $('#uploadFileButton').css({
+            "opacity": "1",
+            "cursor": "pointer"
+        });
     }
 
     // заполняем переменную данными, при изменении значения поля file
     $('input[type=file]').on('change', function () {
-        percentProgress(30);
+        percentProgress(20);
         files = this.files;
-        if (files == undefined || files.length == 0) return;
+        if (files === undefined || files.length === 0) return;
         $('#previewImg').attr("alt", files[0].name);
         var reader = new FileReader();
         reader.onload = function (e) {
             $('#previewImg').attr('src', e.target.result);
         };
         reader.readAsDataURL(files[0]);
-        $('.ajax-reply').html('Выбран: ' + files[0].name);
+        $('.infoPanel').html('Выбран: ' + files[0].name);
         percentProgress(50);
         showButton();
         // $('#previewImg').attr("src",files[0].name);
@@ -380,24 +413,19 @@ $(document).ready(function () {
 
         // ничего не делаем если files пустой
         if (typeof files === 'undefined') {
-            $('.ajax-reply').html('<color="red">Для начало необходимо выбрать фото для загрузки.');
+            $('.infoPanel').html('<color="red">Для начало необходимо выбрать фото для загрузки.</color>');
             return;
         }
-        ;
-
         // создадим объект данных формы
         var data = new FormData();
-
         // заполняем объект данных файлами в подходящем для отправки формате
         $.each(files, function (key, value) {
-            date.append(key, value);
+            data.append(key, value);
         });
-
         // добавим переменную для идентификации запроса
-        date.append('my_file_upload', 1);
-
+        data.append('my_file_upload', 1);
         // AJAX запрос
-        percentProgress(99.9);
+        percentProgress(80);
         $.ajax({
             url: './php/submit_lf.php',
             type: 'POST', // важно!
@@ -410,21 +438,20 @@ $(document).ready(function () {
             contentType: false,
             // функция успешного ответа сервера
             success: function (respond, status, jqXHR) {
-
                 // ОК - файлы загружены
                 if (typeof respond.error === 'undefined') {
-                    // выведем пути загруженных файлов в блок '.ajax-reply'
+                    // выведем пути загруженных файлов в блок '.infoPanel'
+                    percentProgress(90);
                     var files_path = respond.files;
                     var html = 'Загружен: ';
                     $.each(files_path, function (key, val) {
                         html += val + '<br>';
                     });
+                    percentProgress(100);
                     hideButton(html);
-
-                    // $('.ajax-reply').html(html);
                 }
-                // ошибка
                 else {
+                    // ошибка
                     console.log('ОШИБКА: ' + respond.error);
                     percentProgress(0);
                 }

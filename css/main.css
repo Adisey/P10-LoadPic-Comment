@@ -99,7 +99,7 @@ label[for="upload"] :hover {
     text-align: center; /* To center it horizontally (if you want) */
     line-height: 10px; /* To center it vertically */
     color: white;
-    transition: all 0.5s;
+    transition: all 0.2s;
     font-size: 8px;
 }
 
@@ -114,7 +114,7 @@ label[for="upload"] :hover {
     font-weight: bolder;
 }
 
-.ajax-reply {
+.infoPanel {
     background-color: white;
 }
 
