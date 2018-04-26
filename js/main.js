@@ -324,7 +324,7 @@ $(window).scroll(function () {
     // textScroll.html('222');
     // var scrolled = window.pageYOffset || document.documentElement.scrollTop;
     // document.getElementById('showScroll').innerHTML = scrolled + 'px';
-    console.log('aa- ' + scrolled);
+    //console.log('aa- ' + scrolled);
     textScroll.append('<p>111</p>');
     // $('.textScroll').html = '<p> от - '+who +' '+ scrolled + 'px </p>';
 })
