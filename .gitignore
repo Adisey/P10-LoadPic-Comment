@@ -1,4 +1,9 @@
 temp
 .idea
 js/jquery-3.3.1.js
-uploads
+# папака загрузки uploads
+uploads/*.json
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.png
+uploads/*.gif
