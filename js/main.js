@@ -3,10 +3,9 @@ request = getXMLHttpRequest();
 var maxCountOnStep = 10;     // Колличество сообщений при единоразовой выгрузке
 var stepSroll = 3;          // Шаг прокрутки
 var countOnPage = maxCountOnStep;        // Колличество сообщений которые должны присудствовать на экране ( после прокрутки)
-var lastScoll = 0;          // Переменная для проверки в какую сторну прошла прокрутка
 var zapas = 15;             // Отступ снузу, при достижении которого, необходимо начитать вычитку.
 var busyDraw = false;       // Блокировка, чтобы во время чтения и пеперисоки не пепевозбуждался Scroll
-
+var EndMessage = false;     // Будет взводиться при отображении посдеднего сообщения (а на самом деле первого ;-)
 // Инфомируем об сообщениях AJAX
 request.onreadystatechange = function () {
     // if (request.readyState == 4) {
@@ -81,7 +80,8 @@ function readJSONDBShowMessage(newMessage) {
     var allMessageJSON;
     var MessageIndex;
     var fileExist = true;
-    var showLastMessage = false;
+    // var showLastMessage = false;
+    EndMessage = false;
     var showComment = $('#showComment');
     showComment.html('<div class="warningLoad">Загрузка<div>');
     $.getJSON('./uploads/message.json', function (allMessageJSON) {
@@ -114,14 +114,18 @@ function readJSONDBShowMessage(newMessage) {
                     MessageIndex[1] = indexTMP;         // добавляем в массив массив с индексом
                 }
                 // Запись в JSON базу
-                console.log(MessageIndex[0]);
+                //console.log(MessageIndex[0]);
                 writeJSONDBf(MessageIndex[0]);
             }
-            console.log(MessageIndex);
-            showLastMessage = showTopMess(MessageIndex, countOnPage); // Отображение сообщений на страницу
+            //console.log(MessageIndex);
+            showTopMess(MessageIndex); //, countOnPage); // Отображение сообщений на страницу
+            if (EndMessage) {
+                countOnPage = Math.max(MessageIndex[1].length, maxCountOnStep);
+                console.log('readJSONDBShowMessage - LastMess - ' + MessageIndex[1].length);
+            }
             $("div.warningLoad").remove();
         });
-    return showLastMessage;
+    // return showLastMessage;
 }
 
 // Апдейтим Дату из текста и создание индекса
@@ -136,8 +140,9 @@ function updateData(obj) {
     return [obj, index];
 }
 
-// Отображение последних 10 сообщений
-function showTopMess(TmpMessageIndex, TmpCountOnPage) {
+// Отображение последних X сообщений
+// function showTopMess(TmpMessageIndex, TmpCountOnPage) {
+function showTopMess(TmpMessageIndex) {
     var showComment = $('#showComment');
     if (TmpMessageIndex === undefined) {
         showComment.append('Комментариев нет.'); // Массив пустой
@@ -155,13 +160,12 @@ function showTopMess(TmpMessageIndex, TmpCountOnPage) {
                     '<div class="showLastComent">' +
                     '<p>Последний комментарий.</p>' +
                     '</div>');
-                return true;
+                EndMessage = true;
             }
             TmpcountOnPage--;
         }
     }
 }
-
 
 function getXMLHttpRequest() {
     if (window.XMLHttpRequest) {
@@ -212,7 +216,7 @@ function validateShowMessage(form) {
         valid = false;
     }
     if (valid) {
-        console.log("Проверка пройдена");
+        //console.log("Проверка пройдена");
         var message = {
             // date: ruDate(new Date(), 'TS'),
             date: new Date(),
@@ -281,38 +285,30 @@ $(document).ready(function () {
 
     var windowShowComment = $('#showComment');
     windowShowComment.scroll(function () {
-        if (busyDraw) return;
+        if (busyDraw || EndMessage) return;
         var scrolled = windowShowComment.scrollTop();   //*************************
         var DevSize = windowShowComment.height();       // Спросить у Игоря, почему в одном случает только this а в других птолько $
         var DevSizeScroll = this.scrollHeight;          //*************************
         // console.log('Scrolled - ' + scrolled);
         var textScroll = $('#textScroll');
-        textScroll.html('<p> ' +
-            'LastScoll - ' + lastScoll + ' (px) <br> ' +
+        var ScrollInfo = '<p> ' +
+            'EndMessage - ' + EndMessage + ' <br> ' +
             'Scroll - ' + scrolled + ' (px) <br> ' +
             'Размер окна - ' + DevSize + ' px <br> ' +
             'Размер содержимого - ' + DevSizeScroll + ' px<br> ' +
             'countOnPage - ' + countOnPage + ' <br> ' +
             'stepSroll - ' + stepSroll + ' <br> ' +
-            '</p>');
-        if (lastScoll < scrolled && DevSize + scrolled + zapas > DevSizeScroll) {
+            '</p>';
+        // console.log(ScrollInfo);
+        textScroll.html(ScrollInfo);
+        if (DevSize + scrolled + zapas > DevSizeScroll) {
             busyDraw = true;
             var tempScroll = scrolled;      // Зпоминаем позицию Sсroll
-            console.log("Пора читать");
-            // var maxCountOnStep = 10;     // Колличество сообщений при единоразовой выгрузке
-            // var stepSroll = 3;          // Шаг прокрутки
-            // var countOnPage = maxCountOnStep;        // Колличество сообщений которые должны присудствовать на экране ( после прокрутки)
             countOnPage += stepSroll;
-            if (readJSONDBShowMessage()) {
-                // если отобразилась посдедняя запись, мы блокируем вычитку новых имитируя через lastScoll что просколили вверх.
-                lastScoll = scrolled - 1;
-                countOnPage -= stepSroll;
-
-            } else {
-                lastScoll = scrolled;
-            }
+            readJSONDBShowMessage();
             windowShowComment.scrollTop(tempScroll);    // Восстанавливаем позицию Sсroll
             busyDraw = false;
+        } else {
         }
     });
 
@@ -456,9 +452,7 @@ $(document).ready(function () {
                 percentProgress(0);
             }
         });
-
     });
-
 
 });
 
