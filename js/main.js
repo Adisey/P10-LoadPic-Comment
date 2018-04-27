@@ -1,14 +1,11 @@
 var files; // переменная. будет содержать данные файлов
 request = getXMLHttpRequest();
 var maxCountOnStep = 10;     // Колличество сообщений при единоразовой выгрузке
-var spepSroll = 3;          // Шаг прокрутки
+var stepSroll = 3;          // Шаг прокрутки
 var countOnPage = maxCountOnStep;        // Колличество сообщений которые должны присудствовать на экране ( после прокрутки)
-
-// Для эконрмии памяти будем держать это в локальных переменных
-// var allMessageCount = 0; // Общее колличество отправленных сообщений
-// var allMessage = {}; // Все отправленные сообщения
-// var indexMessage = []; // Идекс для записей
-
+var zapas = 15;             // Отступ снузу, при достижении которого, необходимо начитать вычитку.
+var busyDraw = false;       // Блокировка, чтобы во время чтения и пеперисоки не пепевозбуждался Scroll
+var EndMessage = false;     // Будет взводиться при отображении посдеднего сообщения (а на самом деле первого ;-)
 // Инфомируем об сообщениях AJAX
 request.onreadystatechange = function () {
     // if (request.readyState == 4) {
@@ -83,6 +80,8 @@ function readJSONDBShowMessage(newMessage) {
     var allMessageJSON;
     var MessageIndex;
     var fileExist = true;
+    // var showLastMessage = false;
+    EndMessage = false;
     var showComment = $('#showComment');
     showComment.html('<div class="warningLoad">Загрузка<div>');
     $.getJSON('./uploads/message.json', function (allMessageJSON) {
@@ -115,13 +114,18 @@ function readJSONDBShowMessage(newMessage) {
                     MessageIndex[1] = indexTMP;         // добавляем в массив массив с индексом
                 }
                 // Запись в JSON базу
-                console.log(MessageIndex[0]);
+                //console.log(MessageIndex[0]);
                 writeJSONDBf(MessageIndex[0]);
             }
-            console.log(MessageIndex);
-            showTopMess(MessageIndex, countOnPage); // Отображение сообщений на страницу
+            //console.log(MessageIndex);
+            showTopMess(MessageIndex); //, countOnPage); // Отображение сообщений на страницу
+            if (EndMessage) {
+                countOnPage = Math.max(MessageIndex[1].length, maxCountOnStep);
+                console.log('readJSONDBShowMessage - LastMess - ' + MessageIndex[1].length);
+            }
             $("div.warningLoad").remove();
-        })
+        });
+    // return showLastMessage;
 }
 
 // Апдейтим Дату из текста и создание индекса
@@ -136,11 +140,12 @@ function updateData(obj) {
     return [obj, index];
 }
 
-// Отображение последних 10 сообщений
-function showTopMess(TmpMessageIndex, TmpCountOnPage) {
+// Отображение последних X сообщений
+// function showTopMess(TmpMessageIndex, TmpCountOnPage) {
+function showTopMess(TmpMessageIndex) {
     var showComment = $('#showComment');
     if (TmpMessageIndex === undefined) {
-        showComment.append('Комментариев нет.');
+        showComment.append('Комментариев нет.'); // Массив пустой
     } else {
         var currentMessage = TmpMessageIndex[1].length;
         var TmpcountOnPage = countOnPage;
@@ -150,25 +155,17 @@ function showTopMess(TmpMessageIndex, TmpCountOnPage) {
             // showOneMessageScreen(bb);
             showOneMessageScreen(TmpMessageIndex[0][TmpMessageIndex[1][currentMessage - 1]]);
             currentMessage--;
+            if (!currentMessage) { // Если currentMessage=0 значит это последнее сообщение
+                showComment.append(
+                    '<div class="showLastComent">' +
+                    '<p>Последний комментарий.</p>' +
+                    '</div>');
+                EndMessage = true;
+            }
             TmpcountOnPage--;
         }
     }
 }
-
-
-// Отовизм потом убить
-// function showAllMess(message) {
-//     console.log(message);
-//     for (key in message) {
-//         message[key].date = new Date(message[key].date);
-//     }
-//     console.log(message);
-//     for (key in message) {
-//         console.log(key);
-//         console.log(message[key]);
-//         showNewMessageScreen(message[key]);
-//     }
-// }
 
 function getXMLHttpRequest() {
     if (window.XMLHttpRequest) {
@@ -176,13 +173,6 @@ function getXMLHttpRequest() {
     }
     return new ActiveXObject('Microsoft.XMLHTTP');
 }
-
-// Отовизм заменять будем в связи с тем, что перед выдачей, нужно вычитать сообщения из базы.
-// function showNewMessageScreen(message) {
-//     $("#showComment").prepend("<p>" + message.text + "</p>");
-//     $("#showComment").prepend("<p><b>" + message.user + "</b></p>");
-//     $("#showComment").prepend('<p align="right"><span>--- ' + ruDate(message.date, 'TS') + " ---</span></p>");
-// }
 
 // Отобразить одно сообщение
 function showOneMessageScreen(message) {
@@ -195,34 +185,6 @@ function showOneMessageScreen(message) {
         '</div>');
 
 }
-
-// Отовизм убить
-// function writeMessageFile(message) {
-//     params = "text=" + "-" + ruDate(message.date, 'TS') + "-<br>" + "<p><b>" + message.user + "</b></p><br>" + "<p>" + message.text + "</p><br>" + "\n";
-//     request.open('POST', 'php/save_mess.php', true);
-//     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-//     request.send(params);
-// }
-
-// Отовизм убить
-// function lastJSONmessage(message) {
-//     var message_json = JSON.stringify(message);
-//     console.log(message);
-//     console.log(message_json);
-//     // $.ajax({
-//     //     url: 'data.php',
-//     //     type: 'POST',
-//     //     data: {myJson: message_json, fileName: 'lastmessage.json'},
-//     // });
-//
-//     $.ajax({
-//         url: 'php/writejson.php',
-//         type: 'POST',
-//         data: {myJson: message_json, fileName: '../uploads/lastmessage.json'},
-//     });
-//
-//
-// }
 
 function showError(container, errorMessage) {
     container.className = 'error';
@@ -254,7 +216,7 @@ function validateShowMessage(form) {
         valid = false;
     }
     if (valid) {
-        console.log("Проверка пройдена");
+        //console.log("Проверка пройдена");
         var message = {
             // date: ruDate(new Date(), 'TS'),
             date: new Date(),
@@ -262,10 +224,6 @@ function validateShowMessage(form) {
             text: elems.comment.value
         };
         readJSONDBShowMessage(message);
-
-//        showNewMessageScreen(message); //Отовизм убрать
-//        writeMessageFile(message);  //Отовизм убрать
-//        lastJSONmessage(message);   //Отовизм убрать
     } else {
         // alert("Необходимо заполнить поля.");
     }
@@ -291,7 +249,7 @@ function ruDate(date, format) {
         tmpM = (date.getMonth() + 1);
         tmpM = '.' + ((tmpM < 10) ? '0' + tmpM : tmpM) + '.';
     } else {
-        var ruMonth = ["января", "февраля", "марта", "апроеля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+        var ruMonth = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
         tmpM = ' ' + ruMonth[date.getMonth()] + ' ';
     }
     var result = date.getDate() + tmpM + date.getFullYear();
@@ -316,41 +274,46 @@ function ruDate(date, format) {
             }
         }
     }
-
     return result;
 }
-$(window).scroll(function () {
-    var textScroll = $('#textScroll');
-    // textScroll.html('222');
-    // var scrolled = window.pageYOffset || document.documentElement.scrollTop;
-    // document.getElementById('showScroll').innerHTML = scrolled + 'px';
-    //console.log('aa- ' + scrolled);
-    textScroll.append('<p>111</p>');
-    // $('.textScroll').html = '<p> от - '+who +' '+ scrolled + 'px </p>';
-})
 
 $(document).ready(function () {
+    // Run on Load Document
     hideButton();
     percentProgress(0);
     readJSONDBShowMessage();
-    //myScroll('on load');
-    // $(window).onscroll = myScroll('s');
-    // $(window).onwheel = myScroll('m');
-    // document.getElementById('showComment').addEventListener('scroll', myScroll('D'),false);
-    // $(window).scroll(myScroll('SS'));
 
-    // function myScroll(who) {
-    //     var textScroll = $('#textScroll');
-    //     // textScroll.html('222');
-    //     var scrolled = window.pageYOffset || document.documentElement.scrollTop;
-    //     // document.getElementById('showScroll').innerHTML = scrolled + 'px';
-    //     console.log(who + ' ' + scrolled);
-    //     textScroll.append('<p> от - '+who +' '+ scrolled + 'px </p>');
-    //     // $('.textScroll').html = '<p> от - '+who +' '+ scrolled + 'px </p>';
-    //
-    // }
+    var windowShowComment = $('#showComment');
+    windowShowComment.scroll(function () {
+        if (busyDraw || EndMessage) return;
+        var scrolled = windowShowComment.scrollTop();   //*************************
+        var DevSize = windowShowComment.height();       // Спросить у Игоря, почему в одном случает только this а в других птолько $
+        var DevSizeScroll = this.scrollHeight;          //*************************
+        // console.log('Scrolled - ' + scrolled);
+        var textScroll = $('#textScroll');
+        var ScrollInfo = '<p> ' +
+            'EndMessage - ' + EndMessage + ' <br> ' +
+            'Scroll - ' + scrolled + ' (px) <br> ' +
+            'Размер окна - ' + DevSize + ' px <br> ' +
+            'Размер содержимого - ' + DevSizeScroll + ' px<br> ' +
+            'countOnPage - ' + countOnPage + ' <br> ' +
+            'stepSroll - ' + stepSroll + ' <br> ' +
+            '</p>';
+        // console.log(ScrollInfo);
+        textScroll.html(ScrollInfo);
+        if (DevSize + scrolled + zapas > DevSizeScroll) {
+            busyDraw = true;
+            var tempScroll = scrolled;      // Зпоминаем позицию Sсroll
+            countOnPage += stepSroll;
+            readJSONDBShowMessage();
+            windowShowComment.scrollTop(tempScroll);    // Восстанавливаем позицию Sсroll
+            busyDraw = false;
+        } else {
+        }
+    });
 
 
+    // Create Function on Load Document
     function percentProgress(pp) {
         if (pp === undefined || pp < 0) pp = 0;
         if (pp > 100) pp = 100;
@@ -489,9 +452,7 @@ $(document).ready(function () {
                 percentProgress(0);
             }
         });
-
     });
-
 
 });
 

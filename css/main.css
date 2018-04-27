@@ -167,9 +167,15 @@ h3 {
     border: 1px black dotted;
 }
 
+.showLastComent {
+    /*background-color: #e3e3e3;*/
+    background-color: #FFF;
+    text-align: center;
+    color: mediumblue;
+}
+
 .showOneComent {
     background-color: #e3e3e3;
-
 }
 
 .showOneComent :hover {
