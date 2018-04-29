@@ -69,6 +69,7 @@ function showUploadImg() {
     });
 }
 
+
 // автоматическое создание сообщений для новой DB.
 function creaJSONDB() {
     var allMessageTmp = {};
