@@ -29,6 +29,14 @@
 
             </div>
         </div>
+        <div id="drag" class="DragDropFrame">
+
+            <div class="DragDropItem" ><img src="uploads/2.jpg" alt="uploads/2.jpg"></div>
+            <div class="DragDropItem" ><img src="uploads/1.png" alt="uploads/1.png"></div>
+            <div class="DragDropItem" ><img src="uploads/3.jpg" alt="uploads/3.jpg"></div>
+            <div class="DragDropItem" ><img src="uploads/4.gif" alt="uploads/4.gif"></div>
+
+        </div>
     </div>
     <div id="boxWriteComments">
         <div class="TitleBox">
@@ -47,9 +55,11 @@
                 <div id="messButtonBar">
                     <input type="button" value="Отправить" onclick="validateShowMessage(this.form)">
                     <input type="reset" value="Очистить">
-                    <!--<input type="button" value="Test" onclick="test()">-->
+                    <input type="button" value="Test" onclick="test()">
                 </div>
+                <div id="drop" class="DragDropFrame"></div>
             </form>
+
         </div>
     </div>
     <div id="boxComment">

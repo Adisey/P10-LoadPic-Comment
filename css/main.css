@@ -124,7 +124,7 @@ label[for="upload"] :hover {
     margin: 20px;
     border: 2px black solid;
     padding: 5px;
-    height: 220px;
+    height: 420px;
 }
 
 #messegeForm {
@@ -229,4 +229,44 @@ h3 {
 
 .error {
     color: red;
+}
+
+.DragDropFrame {
+    margin: auto;
+    padding: 0;
+    flex-wrap: wrap;
+    border-radius: 5px;
+    border: 1px black dotted;
+    display: block;
+    overflow-y: scroll;
+}
+
+#drag {
+    background-color: blue;
+    height: 300px;
+    width: 320px;
+}
+
+#drop {
+    background-color: green;
+    height: 200px;
+    width: 220px;
+}
+
+.DragDropItem {
+    border: 1px black dotted;
+    height: 98px;
+    width: 98px;
+    padding: 0;
+    float: left;
+    border-radius: 2px;
+    display: flex;
+    justify-content: center;
+}
+
+.DragDropItem img {
+    max-height: 100%;
+    max-width: 100%;
+    border-radius: 2px;
+    align-self:center;
 }
