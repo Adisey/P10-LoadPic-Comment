@@ -71,17 +71,15 @@ function showUploadImg() {
 
     // Вариант Игоря
     $.ajax({
-        url : dir,
+        url: dir,
         success: function (data) {
             $(data).find("a").attr("href", function (i, val) {
-                if( val.match(/\.(jpe?g|png|gif)$/) ) {
-                    $("body").append( "<img src='"+ dir + val +"'>" );
+                if (val.match(/\.(jpe?g|png|gif)$/)) {
+                    $("body").append("<img src='" + dir + val + "'>");
                 }
             });
         }
     });
-
-
 
 
 }
@@ -323,176 +321,338 @@ $(document).ready(function () {
     percentProgress(0);
     readJSONDBShowMessage();
 
+
+
+/*(Drag-and-drop)*/
+    // jQuery убирает у объектов событий "лишние" свойства, по этому, если мы хотим использовать HTML5
+    // примочки вместе с jQuery, нужно включить для событий свойство dataTransfer.
+    //  jQuery.event.props.push('dataTransfer'); // атавизм jQuery V. < 3
+    $.event.addProp('dataTransfer');
+    // И еще парочку.
+    // jQuery.event.props.push('pageX');  // атавизм jQuery V. < 3
+    // jQuery.event.props.push('pageY'); // атавизм jQuery V. < 3
+    $.event.addProp('pageX');
+    $.event.addProp('pageY');
+
+
+    /* ДрагИтемы для перетаскивания  (Drag-and-drop)*/
+    $('.DragDropItem')
+
+    // По клику устанавливаем/снимаем выделение, переключаем свойство draggable.
+        .on('click', function(e) {
+            e.preventDefault();
+            $(this).toggleClass('DragDropItemSelected');
+            this.draggable = $(this).hasClass('DragDropItemSelected');
+        })
+
+        // Перед тем как начать перетаскивать элементы,
+        .on('dragstart', function(e) {
+            var dragedElement = '',
+                // находим все выделенные элементы,
+                $selectedItems = $('.DragDropItem.DragDropItemSelected');
+
+            // собираем dragedElement выделенных элементов.
+            $selectedItems.each(function() {
+                dragedElement += this.outerHTML;
+            });
+
+            // Устанавливаем собранный dragedElement в качестве данных для перетаскивания.
+            // Это никак не влияет на визуальную часть.
+            e.dataTransfer.setData('text/html', dragedElement);
+
+
+            // Что бы при перетаскивании нескольких элементов получить "правильную картинку" воспользуемся методом setDragImage объекта e.dataTransfer
+            // setDragImage(image, x, y)
+            // image - элемент изображение которого будет использовано при перетаскивании
+            // x и y — смещение
+
+            // Элемент за который тащим
+            var $draggedItem = $(e.currentTarget),
+                draggedItemOffset = $draggedItem.offset(),
+
+                // Прямоугольник в который вписываются выделенные элементы
+                frame = getFrame($selectedItems),
+
+                // Координаты точки за которую будем тащить
+                dx = e.pageX - draggedItemOffset.left + (draggedItemOffset.left - frame.lx),
+                dy = e.pageY - draggedItemOffset.top + (draggedItemOffset.top - frame.ly),
+
+                // Элемент который будем передавать как image в setDragImage
+                $image = $(document.createElement('div'));
+
+            // Позицианируем $image перед тем как добавить его на страницу.
+            $image.css({
+                position: 'absolute',
+                // Спрячем его подниз, что бы не обрывал событие dragstart
+                zIndex: -1,
+                left: frame.lx,
+                top: frame.ly,
+                width: Math.abs(frame.lx - frame.rx),
+                height: Math.abs(frame.ly - frame.ry)
+            });
+
+            // Добавляем клоны элементов к $image
+            $selectedItems.each(function(i, item) {
+                var $item = $(item),
+                    $clone = $item.clone(),
+                    itemOffset = $item.offset();
+
+                // Позицианируем клоны внутри $image
+                $clone.css({
+                    position: 'absolute',
+                    left: itemOffset.left - frame.lx,
+                    top: itemOffset.top - frame.ly
+                });
+
+                $image.append($clone);
+            });
+
+            // Добавляем $image на страницу
+            $('body').append($image);
+
+            // Устанавливаем $image в качестве картинки для перетаскивания
+            e.dataTransfer.setDragImage($image.get(0), dx, dy);
+
+            // Удаляем $image через 1 милисекунду. Если удалить срзау,
+            // то вызов setDragImage произойдет до того как отрендерится $image
+            window.setTimeout(function() {
+                $image.remove();
+            }, 1);
+
+            return true;
+        })
+
+        .on('dragend', function(e) {
+            resetAfterDaD();
+        });
+
+    /* Дроп зона  (Drag-and-drop)*/
+
+    $('.DropFrame')
+    // При наведении добавляем класс dragover
+        .on('dragenter', function(e) {
+            $(this).addClass('dragover');
+        })
+        // Убираем класс dragover
+        .on('dragleave', function(e) {
+            $(this).removeClass('dragover');
+        })
+        .on('dragover', function(e) {
+            // Что бы до элемента дошло событие drop, нужно запретить передачу по цепочке события dragover
+            if (e.preventDefault) e.preventDefault();
+            return false;
+        })
+
+        // Обрабатываем drop
+        .on('drop', function(e) {
+            // Доастем HTML из события
+            var dragedElement = e.dataTransfer.getData('text/html');
+
+            // Добавляем dragedElement к дропзоне
+            $(this).append(dragedElement);
+
+            resetAfterDaD(true);
+            return true;
+        });
+
+    // очистка (Drag-and-drop)
+    function resetAfterDaD(del) {
+        if (del) $('.DragFrame .DragDropItemSelected').remove();
+        $('.DragDropItemSelected').removeClass('DragDropItemSelected').attr('draggable', false);
+        $('.dragover').removeClass('dragover');
+    }
+
+    // Возвращает прямоугольник в который вписываются $items  (Drag-and-drop)
+    function getFrame($items) {
+        var offset = $items.first().offset(),
+            frame = { lx: offset.left, ly: offset.top, rx: offset.left, ry: offset.top };
+
+        $items.each(function() {
+            var $this = $(this),
+                offset = $this.offset(),
+                width = $this.width(),
+                height = $this.height();
+
+            if (offset.left < frame.lx) frame.lx = offset.left;
+            if (offset.top  < frame.ly) frame.ly = offset.top;
+            if (offset.left + width > frame.rx) frame.rx = offset.left + width;
+            if (offset.top + height > frame.ry) frame.ry = offset.top + height;
+
+        });
+        return frame;
+    }
+
     var windowShowComment = $('#showComment');
-    windowShowComment.scroll(function () {
-        if (busyDraw || EndMessage) return;
-        var scrolled = windowShowComment.scrollTop();   //*************************
-        var DevSize = windowShowComment.height();       // Спросить у Игоря, почему в одном случает только this а в других птолько $
-        var DevSizeScroll = this.scrollHeight;          //*************************
-        // console.log('Scrolled - ' + scrolled);
-        var textScroll = $('#textScroll');
-        var ScrollInfo = '<p> ' +
-            'EndMessage - ' + EndMessage + ' <br> ' +
-            'Scroll - ' + scrolled + ' (px) <br> ' +
-            'Размер окна - ' + DevSize + ' px <br> ' +
-            'Размер содержимого - ' + DevSizeScroll + ' px<br> ' +
-            'countOnPage - ' + countOnPage + ' <br> ' +
-            'stepSroll - ' + stepSroll + ' <br> ' +
-            '</p>';
-        // console.log(ScrollInfo);
-        textScroll.html(ScrollInfo);
-        if (DevSize + scrolled + zapas > DevSizeScroll) {
-            busyDraw = true;
-            var tempScroll = scrolled;      // Зпоминаем позицию Sсroll
-            countOnPage += stepSroll;
-            readJSONDBShowMessage();
-            windowShowComment.scrollTop(tempScroll);    // Восстанавливаем позицию Sсroll
-            busyDraw = false;
-        } else {
-        }
-    });
-
-
-    // Create Function on Load Document
-    function percentProgress(pp) {
-        if (pp === undefined || pp < 0) pp = 0;
-        if (pp > 100) pp = 100;
-        var myProgress = $('#myProgress');
-        switch (pp) {
-            case 0:
-                myProgress.css({
-                    "opacity": "0",
-                    "transition": "all 0;"
-                });
-                break;
-            case 100:
-                setTimeout(function () {
-                    $('#myProgress').css({
-                        "opacity": "0",
-                        "transition": "all 0.3s;"
-                    });
-                }, 500);
-                setTimeout(function () {
-                    var myBar = $('#myBar');
-                    myBar.css({"width": "0%"});
-                    myBar.html("0%");
-                }, 1500);
-                break;
-            default:
-                myProgress.css({
-                    "opacity": "1",
-                    "transition": "all 0.3s;"
-                });
-                break;
-        }
-        var myBar = $('#myBar');
-        myBar.css({"width": pp + "%"});
-        myBar.html(pp + "%");
-    }
-
-    function hideButton(stat) {
-        $('#uploadFileButton').css({
-            "opacity": "0",
-            "cursor": "default"
-        });
-        $('#previewImg').attr(
-            'src', 'img/Load.png',
-            "alt", 'Выберите файл для загрузки.'
-        );
-        var infoPanel = $('.infoPanel');
-        var defaultStatus = "Выберите файл для загрузки.";
-        if (stat === undefined) {
-            infoPanel.html(defaultStatus);
-        } else {
-            infoPanel.html(stat);
-            setTimeout(function () {
-                infoPanel.html(defaultStatus)
-            }, 5000);
-        }
-    }
-
-    function showButton() {
-        $('#uploadFileButton').css({
-            "opacity": "1",
-            "cursor": "pointer"
-        });
-    }
-
-    // заполняем переменную данными, при изменении значения поля file
-    $('input[type=file]').on('change', function () {
-        percentProgress(20);
-        files = this.files;
-        if (files === undefined || files.length === 0) return;
-        $('#previewImg').attr("alt", files[0].name);
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            $('#previewImg').attr('src', e.target.result);
-        };
-        reader.readAsDataURL(files[0]);
-        $('.infoPanel').html('Выбран: ' + files[0].name);
-        percentProgress(50);
-        showButton();
-        // $('#previewImg').attr("src",files[0].name);
-    });
-
-    // обработка и отправка AJAX запроса при клике на кнопку upload_files
-    $('#uploadFileButton').on('click', function (event) {
-        event.stopPropagation(); // остановка всех текущих JS событий
-        event.preventDefault();  // остановка дефолтного события для текущего элемента - клик для <a> тега
-        percentProgress(70);
-
-        // ничего не делаем если files пустой
-        if (typeof files === 'undefined') {
-            $('.infoPanel').html('<color="red">Для начало необходимо выбрать фото для загрузки.</color>');
-            return;
-        }
-        // создадим объект данных формы
-        var data = new FormData();
-        // заполняем объект данных файлами в подходящем для отправки формате
-        $.each(files, function (key, value) {
-            data.append(key, value);
-        });
-        // добавим переменную для идентификации запроса
-        data.append('my_file_upload', 1);
-        // AJAX запрос
-        percentProgress(80);
-        $.ajax({
-            url: './php/submit_lf.php',
-            type: 'POST', // важно!
-            data: data,
-            cache: false,
-            dataType: 'json',
-            // отключаем обработку передаваемых данных, пусть передаются как есть
-            processData: false,
-            // отключаем установку заголовка типа запроса. Так jQuery скажет серверу что это строковой запрос
-            contentType: false,
-            // функция успешного ответа сервера
-            success: function (respond, status, jqXHR) {
-                // ОК - файлы загружены
-                if (typeof respond.error === 'undefined') {
-                    // выведем пути загруженных файлов в блок '.infoPanel'
-                    percentProgress(90);
-                    var files_path = respond.files;
-                    var html = 'Загружен: ';
-                    $.each(files_path, function (key, val) {
-                        html += val + '<br>';
-                    });
-                    percentProgress(100);
-                    hideButton(html);
+            windowShowComment.scroll(function () {
+                if (busyDraw || EndMessage) return;
+                var scrolled = windowShowComment.scrollTop();   //*************************
+                var DevSize = windowShowComment.height();       // Спросить у Игоря, почему в одном случает только this а в других птолько $
+                var DevSizeScroll = this.scrollHeight;          //*************************
+                // console.log('Scrolled - ' + scrolled);
+                var textScroll = $('#textScroll');
+                var ScrollInfo = '<p> ' +
+                    'EndMessage - ' + EndMessage + ' <br> ' +
+                    'Scroll - ' + scrolled + ' (px) <br> ' +
+                    'Размер окна - ' + DevSize + ' px <br> ' +
+                    'Размер содержимого - ' + DevSizeScroll + ' px<br> ' +
+                    'countOnPage - ' + countOnPage + ' <br> ' +
+                    'stepSroll - ' + stepSroll + ' <br> ' +
+                    '</p>';
+                // console.log(ScrollInfo);
+                textScroll.html(ScrollInfo);
+                if (DevSize + scrolled + zapas > DevSizeScroll) {
+                    busyDraw = true;
+                    var tempScroll = scrolled;      // Зпоминаем позицию Sсroll
+                    countOnPage += stepSroll;
+                    readJSONDBShowMessage();
+                    windowShowComment.scrollTop(tempScroll);    // Восстанавливаем позицию Sсroll
+                    busyDraw = false;
+                } else {
                 }
-                else {
-                    // ошибка
-                    console.log('ОШИБКА: ' + respond.error);
-                    percentProgress(0);
+            });
+
+
+// Create Function on Load Document
+            function percentProgress(pp) {
+                if (pp === undefined || pp < 0) pp = 0;
+                if (pp > 100) pp = 100;
+                var myProgress = $('#myProgress');
+                switch (pp) {
+                    case 0:
+                        myProgress.css({
+                            "opacity": "0",
+                            "transition": "all 0;"
+                        });
+                        break;
+                    case 100:
+                        setTimeout(function () {
+                            $('#myProgress').css({
+                                "opacity": "0",
+                                "transition": "all 0.3s;"
+                            });
+                        }, 500);
+                        setTimeout(function () {
+                            var myBar = $('#myBar');
+                            myBar.css({"width": "0%"});
+                            myBar.html("0%");
+                        }, 1500);
+                        break;
+                    default:
+                        myProgress.css({
+                            "opacity": "1",
+                            "transition": "all 0.3s;"
+                        });
+                        break;
                 }
-            },
-            // функция ошибки ответа сервера
-            error: function (jqXHR, status, errorThrown) {
-                console.log('ОШИБКА AJAX запроса: ' + status, jqXHR);
-                percentProgress(0);
+                var myBar = $('#myBar');
+                myBar.css({"width": pp + "%"});
+                myBar.html(pp + "%");
             }
-        });
-    });
 
-});
+            function hideButton(stat) {
+                $('#uploadFileButton').css({
+                    "opacity": "0",
+                    "cursor": "default"
+                });
+                $('#previewImg').attr(
+                    'src', 'img/Load.png',
+                    "alt", 'Выберите файл для загрузки.'
+                );
+                var infoPanel = $('.infoPanel');
+                var defaultStatus = "Выберите файл для загрузки.";
+                if (stat === undefined) {
+                    infoPanel.html(defaultStatus);
+                } else {
+                    infoPanel.html(stat);
+                    setTimeout(function () {
+                        infoPanel.html(defaultStatus)
+                    }, 5000);
+                }
+            }
+
+            function showButton() {
+                $('#uploadFileButton').css({
+                    "opacity": "1",
+                    "cursor": "pointer"
+                });
+            }
+
+// заполняем переменную данными, при изменении значения поля file
+            $('input[type=file]').on('change', function () {
+                percentProgress(20);
+                files = this.files;
+                if (files === undefined || files.length === 0) return;
+                $('#previewImg').attr("alt", files[0].name);
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#previewImg').attr('src', e.target.result);
+                };
+                reader.readAsDataURL(files[0]);
+                $('.infoPanel').html('Выбран: ' + files[0].name);
+                percentProgress(50);
+                showButton();
+                // $('#previewImg').attr("src",files[0].name);
+            });
+
+// обработка и отправка AJAX запроса при клике на кнопку upload_files
+            $('#uploadFileButton').on('click', function (event) {
+                event.stopPropagation(); // остановка всех текущих JS событий
+                event.preventDefault();  // остановка дефолтного события для текущего элемента - клик для <a> тега
+                percentProgress(70);
+
+                // ничего не делаем если files пустой
+                if (typeof files === 'undefined') {
+                    $('.infoPanel').html('<color="red">Для начало необходимо выбрать фото для загрузки.</color>');
+                    return;
+                }
+                // создадим объект данных формы
+                var data = new FormData();
+                // заполняем объект данных файлами в подходящем для отправки формате
+                $.each(files, function (key, value) {
+                    data.append(key, value);
+                });
+                // добавим переменную для идентификации запроса
+                data.append('my_file_upload', 1);
+                // AJAX запрос
+                percentProgress(80);
+                $.ajax({
+                    url: './php/submit_lf.php',
+                    type: 'POST', // важно!
+                    data: data,
+                    cache: false,
+                    dataType: 'json',
+                    // отключаем обработку передаваемых данных, пусть передаются как есть
+                    processData: false,
+                    // отключаем установку заголовка типа запроса. Так jQuery скажет серверу что это строковой запрос
+                    contentType: false,
+                    // функция успешного ответа сервера
+                    success: function (respond, status, jqXHR) {
+                        // ОК - файлы загружены
+                        if (typeof respond.error === 'undefined') {
+                            // выведем пути загруженных файлов в блок '.infoPanel'
+                            percentProgress(90);
+                            var files_path = respond.files;
+                            var html = 'Загружен: ';
+                            $.each(files_path, function (key, val) {
+                                html += val + '<br>';
+                            });
+                            percentProgress(100);
+                            hideButton(html);
+                        }
+                        else {
+                            // ошибка
+                            console.log('ОШИБКА: ' + respond.error);
+                            percentProgress(0);
+                        }
+                    },
+                    // функция ошибки ответа сервера
+                    error: function (jqXHR, status, errorThrown) {
+                        console.log('ОШИБКА AJAX запроса: ' + status, jqXHR);
+                        percentProgress(0);
+                    }
+                });
+            });
+
+        })
+    ;
 

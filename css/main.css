@@ -231,7 +231,8 @@ h3 {
     color: red;
 }
 
-.DragDropFrame {
+.DragFrame,
+.DropFrame {
     margin: auto;
     padding: 0;
     flex-wrap: wrap;
@@ -241,13 +242,13 @@ h3 {
     overflow-y: scroll;
 }
 
-#drag {
-    background-color: blue;
+.DragFrame {
+    background-color: #5caaff;
     height: 300px;
     width: 320px;
 }
 
-#drop {
+.DropFrame {
     background-color: green;
     height: 200px;
     width: 220px;
@@ -262,6 +263,21 @@ h3 {
     border-radius: 2px;
     display: flex;
     justify-content: center;
+    transition: all 0.3s;
+}
+
+.DragDropItemSelected {
+    border: 3px #0000FF ridge;
+    height: 94px;
+    width: 94px;
+    transition: all 0.3s;
+    /*background-image: url("../img/selectitm.png");*/
+}
+
+.DragDropItemTEST {
+    border: 3px red ridge;
+    height: 94px;
+    width: 94px;
 }
 
 .DragDropItem img {
