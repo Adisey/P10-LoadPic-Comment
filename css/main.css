@@ -194,6 +194,14 @@ h3 {
     opacity: 1;
 }
 
+#showComment img {
+    float:left;
+    margin: 2px;
+    max-height: 50px;
+    max-width: 50px;
+    align-self:center;
+}
+
 #textScroll {
     border: 1px black dotted;
 }
@@ -285,4 +293,11 @@ h3 {
     max-width: 100%;
     border-radius: 2px;
     align-self:center;
+}
+
+.ToDo {
+    border: 1px black double;
+    margin: 20px;
+    padding: 10px;
+    list-style-position: inside;
 }
