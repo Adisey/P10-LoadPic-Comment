@@ -49,26 +49,42 @@ function test() {
 
 function showUploadImg() {
     var dir = "uploads/";
-    var fileextension = [".png", ".jpg", ".gif"];
+    // Вариант Андрея
+    // var fileextension = [".png", ".jpg", ".gif"];
+    // $.ajax({
+    //     //This will retrieve the contents of the folder if the folder is configured as 'browsable'
+    //     url: dir,
+    //     success: function (data) {
+    //         console.log(data);
+    //         //List all .png file names in the page
+    //         $(data).find("a:contains(" + (fileextension[0]) + "), a:contains(" + (fileextension[1]) + ")").each(function () {
+    //                 var filename = this.href.replace(window.location.host, "").replace("http://", "");
+    //             console.log(dir + filename);
+    //             $("body").append("<img src='" + dir + filename + "'>");
+    //         });
+    //     },
+    //     error: function(XMLHttpRequest, textStatus, errorThrown) {
+    //         console.log("Status: " + textStatus);
+    //         console.log("Error: " + errorThrown);
+    //     }
+    // });
+
+    // Вариант Игоря
     $.ajax({
-        //This will retrieve the contents of the folder if the folder is configured as 'browsable'
-        url: dir,
+        url : dir,
         success: function (data) {
-            console.log(data);
-            //List all .png file names in the page
-            $(data).find("a:contains(" + (fileextension[0]) + "), a:contains(" + (fileextension[1]) + ")").each(function () {
-                    var filename = this.href.replace(window.location.host, "").replace("http://", "");
-                console.log(dir + filename);
-                $("body").append("<img src='" + dir + filename + "'>");
+            $(data).find("a").attr("href", function (i, val) {
+                if( val.match(/\.(jpe?g|png|gif)$/) ) {
+                    $("body").append( "<img src='"+ dir + val +"'>" );
+                }
             });
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            console.log("Status: " + textStatus);
-            console.log("Error: " + errorThrown);
         }
     });
-}
 
+
+
+
+}
 
 // автоматическое создание сообщений для новой DB.
 function creaJSONDB() {
