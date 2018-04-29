@@ -49,7 +49,7 @@ function test() {
 
 function showUploadImg() {
     var dir = "uploads/";
-    var fileextension = [".png", ".jpg"];
+    var fileextension = [".png", ".jpg", ".gif"];
     $.ajax({
         //This will retrieve the contents of the folder if the folder is configured as 'browsable'
         url: dir,
