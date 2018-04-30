@@ -5,7 +5,8 @@
     /*border: 1px black dotted;*/
 }
 
-#main {
+.main,
+.basement {
     display: flex;
 }
 
@@ -153,7 +154,7 @@ label[for="upload"] :hover {
     padding: 5px;
 }
 
-h3 {
+h1, h2, h3 {
     margin: auto;
     text-align: center;
 }
@@ -295,7 +296,13 @@ h3 {
     align-self:center;
 }
 
-.ToDo {
+.basement {
+    justify-content: space-around;
+}
+
+.notation {
+    width: 400px;
+    flex-grow: 10;
     border: 1px black double;
     margin: 20px;
     padding: 10px;
