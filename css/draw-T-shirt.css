@@ -31,7 +31,7 @@ h5 {
 #templateTshort {
     height: 500px;
     width: 500px;
-    background-color: #00bb00;
+    /*background-color: #00bb00;*/
     border: 1px black dotted;
     display: flex;
 }
@@ -97,25 +97,19 @@ label {
 
 .panelFontType {
     display: flex;
-
 }
 
 .buttonFontType {
     height: 30px;
     width: 30px;
-    margin: 2px;
-    line-height: 0.4em;
-    /*justify-content: space-between;*/
-
+    margin: 1px;
+    line-height: 0.3em;
+    font-weight: normal;
 }
 
-.blankButon {
-    width: 25px;
-    background-color: #4CAF50;
-}
 
 #FontType_B {
-    font-weight: 600;
+    font-weight: bold;
 }
 
 #FontType_I {
@@ -123,11 +117,11 @@ label {
 }
 
 #FontType_U {
-    text-decoration: underline;
+    text-decoration: underline blue;
 }
 
 #FontType_not {
-    text-decoration: line-through;
+    text-decoration: line-through red;
 }
 
 #textAlign_L {
