@@ -387,10 +387,10 @@ $ (document).ready (function () {
         .on ('dragstart', function (e) {
             var dragedElement = '',
                 // находим все выделенные элементы,
-                $selectedItems = $ ('.DragDropItem.DragDropItemSelected');
+                selectedItems = $ ('.DragDropItem.DragDropItemSelected');
 
             // собираем dragedElement выделенных элементов.
-            $selectedItems.each (function () {
+            selectedItems.each (function () {
                 dragedElement += this.outerHTML;
             });
 
@@ -409,7 +409,7 @@ $ (document).ready (function () {
                 draggedItemOffset = $draggedItem.offset (),
 
                 // Прямоугольник в который вписываются выделенные элементы
-                frame = getFrame ($selectedItems),
+                frame = getFrame (selectedItems),
 
                 // Координаты точки за которую будем тащить
                 dx = e.pageX - draggedItemOffset.left + (draggedItemOffset.left - frame.lx),
@@ -430,7 +430,7 @@ $ (document).ready (function () {
             });
 
             // Добавляем клоны элементов к $image
-            $selectedItems.each (function (i, item) {
+            selectedItems.each (function (i, item) {
                 var $item = $ (item),
                     $clone = $item.clone (),
                     itemOffset = $item.offset ();
@@ -501,12 +501,14 @@ $ (document).ready (function () {
         $ ('.dragover').removeClass ('dragover');
     }
 
-    // Возвращает прямоугольник в который вписываются $items  (Drag-and-drop)
-    function getFrame($items) {
-        var offset = $items.first ().offset (),
+    // Возвращает прямоугольник в который вписываются items  (Drag-and-drop)
+    function getFrame(items) {
+        console.log(items);
+        var offset = items.first ().offset ();
+        console.log(offset);
             frame = { lx: offset.left, ly: offset.top, rx: offset.left, ry: offset.top };
 
-        $items.each (function () {
+        items.each (function () {
             var $this = $ (this),
                 offset = $this.offset (),
                 width = $this.width (),
