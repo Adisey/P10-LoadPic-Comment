@@ -48,7 +48,6 @@ function showUploadImg2() {
             items.push(val);
             console.log(data[val]);
         });
-
         // $( "body" ).append( items );
     });
 }
