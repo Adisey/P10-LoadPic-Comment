@@ -288,7 +288,6 @@ function validateShowMessage(form) {
     });
     console.log (messageImg);
 
-
     if (valid) {
         //console.log("Проверка пройдена");
         var message = {
